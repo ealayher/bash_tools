@@ -1,7 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
 #Created: 08/31/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-#Revised: 04/18/2014 By: Evan Layher
+#Revised: 04/18/2015 By: Evan Layher
 #--------------------------------------------------------------------------------------#
 # Calculates the amount of time it takes to run a shell script
 # Simply source this script and input: script_time_func
@@ -18,7 +18,7 @@
 ## --- LICENSE INFORMATION --- ##
 ## script_time_func.sh is the proprietary property of The Regents of the University of California ("The Regents.")
 
-## Copyright © 2014 The Regents of the University of California, Davis campus. All Rights Reserved.
+## Copyright © 2014-15 The Regents of the University of California, Davis campus. All Rights Reserved.
 
 ## Redistribution and use in source and binary forms, with or without modification, are permitted by nonprofit, 
 ## research institutions for research use only, provided that the following conditions are met:

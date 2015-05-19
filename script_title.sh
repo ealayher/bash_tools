@@ -1,7 +1,8 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
-#Created: 04/22/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-#Revised: 04/18/2015 By: Evan Layher
+# Created: 04/22/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: 05/18/2015 By: Evan Layher
+# Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
 
@@ -35,50 +36,78 @@
 ## --------------------------- ##
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
-text_editors=('kwrite' 'gedit' 'leafpad') # text editor commands in order of preference
-default_permission='755' # '755': Default file permission for new scripts
+default_text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # default text editor commands in order of preference
+default_permission_value='755' # '755': Default file permission for new scripts
+default_script_number='1'
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 todays_date=`date +%x` 	# Inputs date inside of script
 script_path="$(readlink -f ${BASH_SOURCE[0]})"	# Full path of this script
+version_number='2.0'
 
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
-clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
+display_scripts='no'	# 'no': List script explanations (script_display) ['yes' or 'no'] [INPUT: '-nl']
 filename_reader='on'	# 'on': Read in filename
+list_settings='no'	# 'no': List user settings (list_user_settings) ['yes' or 'no'] [INPUT: '-l']
 open_script='no'	# 'no': Opens this script [ -o or --open ]
 p_in='no'		# 'no': Reads in permission level for output file ['yes' or 'no']
-perm_val=${default_permission}	# permission value of output file
+reset_template='no'	# 'no': Reset template file (reset_option_file) ['yes' or 'no'] [INPUT: '-r']
 suggest_help='no'	# 'no': Suggests help if needed ['yes' or 'no']
 
 bad_inputs=()		# (): Array of bad inputs
 
 #-------------------------------- FUNCTIONS --------------------------------#
-create_script () { #Creates, activates and opens new shell script
+create_script () { # Creates, activates and opens new shell script
+if [ ${n_script} -eq ${n_script} 2>/dev/null ]; then
+script_function="create_script${n_script}"
+check_create=(`type -t ${script_function}`)
+	if [ ${check_create[0]} == 'function' 2>/dev/null ]; then
+	${script_function} > ${filename} # Outputs script
+	chmod ${permission_value} ${filename} # Automatically activates script
+	echo "${formatgreen}CREATED: ${formatorange}${file_path}${format}"
+	open_text_editor ${filename} ${text_editors[@]} # open new script
+	else
+	echo "${formatred}INVALID FUNCTION: ${formatorange}${script_function}${format}"
+	exit_message 99
+	fi
+else
+echo "${formatred}INVALID '${formatorange}-n${formatred}' option: ${formatorange}${n_script}${format}"
+exit_message 98
+fi
+}
+
+
+### SCRIPT TYPES: Must have naming convenction of 'create_script*[0-9] () {' [ e.g. create_script10 () { # Comments ]
+create_script1 () { # Advanced script with option file
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-#Created: $todays_date By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-#Revised: $todays_date By: Evan Layher
+# Created: $todays_date By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: $todays_date By: Evan Layher
+# Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
 
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
-max_bg_jobs='10'	# '10': Max number of background processes
-text_editors=('kwrite' 'gedit' 'leafpad') # text editor commands in order of preference
+max_bg_jobs='10' # '10': Max number of background processes
+default_text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_time=\`date +%s\` 		# Script start time (in seconds).
 script_start_date_time=\`date +%x' '%r\`	# Script start date and time: (e.g. 01/01/2015 12:00:00 AM)
 todays_date=\`date +%Y%m%d\`		# Date: (e.g. 20150101)
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
+version_number='1.0'
 
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
 display_exit='yes'	# 'yes': Displays an exit message ['yes' or 'no'] [INPUT: '-nm']
+list_settings='no'	# 'no': List user settings (list_user_settings) ['yes' or 'no'] [INPUT: '-l']
 open_script='no'	# 'no': Opens this script ['yes' or 'no'] [INPUT: '-o' or '--open']
+reset_template='no'	# 'no': Reset template file (reset_option_file) ['yes' or 'no'] [INPUT: '-r']
 show_time='yes'		# 'yes': Displays script process time ['yes' or 'no'] [INPUT: '-nt']
 suggest_help='no'	# 'no': Suggests help if needed ['yes' or 'no']
 
@@ -94,18 +123,31 @@ fi
 }
 
 option_eval () { # Evaluates command line options
-if [ \${1} == '-cs' 2>/dev/null ] || [ \${1} == '-h' 2>/dev/null ] || [ \${1} == '--help' 2>/dev/null ] || [ \${1} == '-nc' 2>/dev/null ] || [ \${1} == '-nt' 2>/dev/null ] || [ \${1} == '-nm' 2>/dev/null ] || [ \${1} == '-o' 2>/dev/null ] || [ \${1} == '--open' 2>/dev/null ]; then
+if [ \${1} == '-cs' 2>/dev/null ] || [ \${1} == '-h' 2>/dev/null ] || [ \${1} == '--help' 2>/dev/null ] || \\
+[ \${1} == '-l' 2>/dev/null ] || [ \${1} == '-nc' 2>/dev/null ] || [ \${1} == '-nt' 2>/dev/null ] || \\
+[ \${1} == '-nm' 2>/dev/null ] || [ \${1} == '-o' 2>/dev/null ] || [ \${1} == '--open' 2>/dev/null ] || \\
+[ \${1} == '-t' 2>/dev/null ] || [ \${1} == '-tr' 2>/dev/null ] || [ \${1} == '-r' 2>/dev/null ]; then
 activate_options \${1}
-elif [ \${1:0:1} == '-' 2>/dev/null ]; then # Checks invalid options
+elif ! [ -z \${t_in} 2>/dev/null ] && [ \${t_in} == 'yes' 2>/dev/null ]; then
+add_editors=(\"\${1} \${add_editors[@]}\") # Maintain order of editor inputs
+elif ! [ -z \${tr_in} 2>/dev/null ] && [ \${tr_in} == 'yes' 2>/dev/null ]; then
+rem_editors+=(\"\${1}\")
+elif [ \${1:0:1} == '-' 2>/dev/null ]; then
+bad_inputs+=(\"\${1}\")
+else
 bad_inputs+=(\"\${1}\")
 fi
 }
 
 activate_options () {
+t_in='no'
+tr_in='no'
 if [ \${1} == '-cs' ]; then
 clear_screen='no'	# Do not clear screen
 elif [ \${1} == '-h' ] || [ \${1} == '--help' ]; then
 activate_help='yes'	# Display help message
+elif [ \${1} == '-l' ]; then
+list_settings='yes'	# List user settings
 elif [ \${1} == '-nc' ]; then
 activate_colors='no'	# Do not display in color
 elif [ \${1} == '-nm' ]; then
@@ -114,6 +156,14 @@ elif [ \${1} == '-nt' ]; then
 show_time='no'		# Do not display script process time
 elif [ \${1} == '-o' ] || [ \${1} == '--open' ]; then
 open_script='yes'	# Open this script
+elif [ \${1} == '-r' ]; then
+reset_template='yes'   # Reset option file
+elif [ \${1} == '-t' ]; then
+t_in='yes'             # Add text editor
+list_settings='yes'	# List user settings
+elif [ \${1} == '-tr' ]; then
+tr_in='yes'            # Remove text editor
+list_settings='yes'	# List user settings
 else
 bad_inputs+=(\"ERROR:activate_options:\${1}\")
 fi
@@ -123,16 +173,76 @@ color_formats () { # Print colorful terminal text
 if [ \${activate_colors} == 'yes' 2>/dev/null ]; then
 format=\`tput setab 0; tput setaf 7\` 	 	# Black background, white text
 formatblue=\`tput setab 0; tput setaf 4\`  	# Black background, blue text
-formatorange=\`tput setab 0; tput setaf 3\`  	# Black background, orange text
 formatgreen=\`tput setab 0; tput setaf 2\` 	# Black background, green text
-formatred=\`tput setab 0; tput setaf 1\` 		# Black background, red text
-formatReset=\`tput sgr0\`				# Reset to default terminal settings
+formatorange=\`tput setab 0; tput setaf 3\`  	# Black background, orange text
+formatred=\`tput setab 0; tput setaf 1\` 	# Black background, red text
+formatreset=\`tput sgr0\`				# Reset to default terminal settings
 else
 format=''	# No formatting
 formatblue=''	# No formatting
-formatorange=''	# No formatting
 formatgreen=''	# No formatting
+formatorange=''	# No formatting
 formatred=''	# No formatting
+fi
+}
+
+open_text_editor () { # Open file [first input file, then text editors]
+file_to_open=\${1}
+valid_text_editor='no'
+if [ -f \${file_to_open} ]; then
+	for i_text_editor in \${@:2}; do
+	\${i_text_editor} \${file_to_open} 2>/dev/null &
+	check_text_pid=(\`ps --no-headers -p \$!\`) # Check pid is running
+		if [ \${#check_text_pid[@]} -gt 0 ]; then
+		valid_text_editor='yes'
+		break
+		fi
+	done
+	if [ \${valid_text_editor} == 'no' 2>/dev/null ]; then
+	echo \"\${formatred}NO VALID TEXT EDITORS: \${formatorange}\${@:2}\${format}\"
+	exit_message 99 -nh -nm -nt
+	fi
+else
+echo \"\${formatred}MISSING FILE: \${formatorange}\${file_to_open}\${format}\"
+fi
+}
+
+create_option_file () { # Creates .ini file to store user preferences
+ealayher_code_dir=\"\${HOME}/.ealayher_code\" # Directory of preference file
+option_file=\"\${ealayher_code_dir}/\`basename \${script_path%.*}\`.ini\" # .ini file path
+
+if ! [ -d \${ealayher_code_dir} ]; then # Create directory for option file
+mkdir \${ealayher_code_dir}
+fi
+
+if ! [ -f \${option_file} ]; then # Create option file
+echo \"[options]
+text_editors=(\${default_text_editors[@]})
+\" > \${option_file}
+fi
+
+text_editors=(\`awk -F '=' '/text_editors=/ {print \$2}' \${option_file} |sed -e 's@(@@g' -e 's@)@@g'\`)
+
+if [ \${#add_editors[@]} -gt 0 ] || [ \${#rem_editors[@]} -gt 0 ]; then # Change text editors
+old_editor_vals=\"text_editors=(\${text_editors[@]})\"
+	for i_rem_editor in \${rem_editors[@]} \${add_editors[@]}; do # Removes duplicate inputs
+	text_editors=(\`printf ' %s ' \${text_editors[@]} |sed \"s@ \${i_rem_editor} @ @g\"\`)
+	done
+	for i_add_editor in \${add_editors[@]}; do # Put newest editor in front
+	text_editors=(\${i_add_editor} \${text_editors[@]})
+	done
+	new_editor_vals=\"text_editors=(\${text_editors[@]})\"
+sed -i \"s@\${old_editor_vals}@\${new_editor_vals}@g\" \${option_file}
+text_editors=(\`awk -F '=' '/text_editors=/ {print \$2}' \${option_file} |sed -e 's@(@@g' -e 's@)@@g'\`)
+fi
+}
+
+vital_command () { # exits script if an essential command fails
+command_status=\${1}
+command_line_number=\${2}
+if ! [ -z \${command_status} ] && [ \${command_status} -ne 0 ]; then
+echo \"\${formatred}INVALID COMMAND: LINE \${formatorange}\${command_line_number}\${format}\"
+exit_message 98 -nh -nm -nt
 fi
 }
 
@@ -147,7 +257,25 @@ done
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\n' \${bad_files[@]}
-exit_message 99 -nm -nt
+exit_message 97 -nh -nm -nt
+fi
+}
+
+reset_option_file () { # -r: Reset user option file
+printf \"\${formatorange}RESET OPTIONS FILE? [\${formatgreen}y\${formatorange}/\${formatgreen}n\${formatorange}]:\${format}\"
+read -r reset_it
+if [ \${reset_it} == 'y' 2>/dev/null ] || [ \${reset_it} == 'Y' 2>/dev/null ]; then
+kill \$! 2>/dev/null # Close file before removing
+wait \$! 2>/dev/null # Suppress kill message
+rm \${option_file} 2>/dev/null
+create_option_file
+elif [ \${reset_it} == 'n' 2>/dev/null ] || [ \${reset_it} == 'N' 2>/dev/null ]; then
+kill \$! 2>/dev/null # Close file before removing
+wait \$! 2>/dev/null # Suppress kill message
+exit_message 0
+else
+re_enter_input_message \${reset_it}
+reset_option_file
 fi
 }
 
@@ -156,31 +284,45 @@ script_usage () { # Script explanation
 echo \"\${formatred}HELP MESSAGE: \${formatgreen}\${script_path}\${format}
 \${formatorange}DESCRIPTION\${format}:
      
+\${formatorange}ADVICE\${format}: Create an alias inside your \${formatorange}\${HOME}/.bashrc\${format} file
+(e.g. \${formatgreen}alias xx='\${script_path}'\${format})
+     
 \${formatorange}USAGE\${format}:
-[\${formatorange}1\${format}] 
+ [\${formatorange}1\${format}] \${formatgreen}\${script_path}\${format}
      
 \${formatorange}OPTIONS\${format}: Can input multiple options in any order
-    -cs              Prevent screen from clearing before script processes
-    -h or --help     Display this message
-    -nc              Prevent color printing in terminal
-    -nm              Prevent exit message from displaying
-    -nt              Prevent script process time from displaying
-    -o or --open     Open this script
+ \${formatblue}-cs\${format}  Prevent screen from clearing before script processes
+ \${formatblue}-h\${format} or \${formatblue}--help\${format}  Display this message
+ \${formatblue}-nc\${format}  Prevent color printing in terminal
+ \${formatblue}-l\${format}   List default settings
+ \${formatblue}-nm\${format}  Prevent exit message from displaying
+ \${formatblue}-nt\${format}  Prevent script process time from displaying
+ \${formatblue}-o\${format} or \${formatblue}--open\${format} Open this script
+ \${formatblue}-r\${format}   Reset option file
+ \${formatblue}-t\${format}   Add text editor(s)\${format}
+  [\${formatorange}2\${format}] \${formatgreen}\${script_path} \${formatblue}-t \${formatorange}kwrite gedit$\{format}
+ \${formatblue}-tr\${format}  Remove text editor(s)\${format}
+  [\${formatorange}3\${format}] \${formatgreen}\${script_path} \${formatblue}-tr \${formatorange}kwrite gedit$\{format}
      
 \${formatorange}DEFAULT SETTINGS\${format}:
-     text editors: \${formatgreen}\${text_editors[@]}\${format}
+ text editors: \${formatgreen}\`grep 'text_editors=' \${option_file} |sed -e 's@text_editors=@@g' -e 's@(@@g' -e 's@)@@g'\`\${format}
      
+\${formatorange}VERSION: \${formatgreen}\${version_number}\${format}
 \${formatred}END OF HELP: \${formatgreen}\${script_path}\${format}\"
 exit_message 0 -nt -nm
 }
 
-invalid_input_message () { # Displays invalid inputs
-if [ \${#bad_inputs[@]} -gt 0 ]; then
-suggest_help='yes'
-echo \"\${formatred}INVALID INPUT\"
-printf '%s\n' \${bad_inputs[@]}
-printf \"\${format}\"
-fi
+list_user_settings () { # -l option
+create_option_file
+echo \"\${formatblue}+---USER SETTINGS---+\${formatorange}\"
+echo \"\${formatgreen}Text editors: \${formatorange}\${text_editors[@]}\${format}\"
+exit_message 0 -nm -nt
+}
+
+re_enter_input_message () { # Displays invalid input message
+clear
+echo \"\${formatred}INVALID INPUT: \${formatorange}\${@}\${format}\"
+echo \"\${formatblue}PLEASE RE-ENTER INPUT\${format}\"
 }
 
 script_time_message () { # Script process time message
@@ -214,8 +356,13 @@ exit_type='0'
 else
 exit_type=\${1}
 fi
+if [ \${exit_type} -ne 0 ]; then
+suggest_help='yes'
+fi
 for exit_inputs; do
-	if [ \${exit_inputs} == '-nt' 2>/dev/null ]; then
+	if [ \${exit_inputs} == '-nh' 2>/dev/null ]; then
+	suggest_help='no'
+	elif [ \${exit_inputs} == '-nt' 2>/dev/null ]; then
 	show_time='no'
 	elif [ \${exit_inputs} == '-nm' 2>/dev/null ]; then
 	display_exit='no'
@@ -223,7 +370,7 @@ for exit_inputs; do
 done
 wait # Waits for background processes to finish before exiting
 # Suggest help message
-if [ \${exit_type} -ne 0 2>/dev/null ] || [ \${suggest_help} == 'yes' 2>/dev/null ]; then
+if [ \${suggest_help} == 'yes' 2>/dev/null ]; then
 echo \"\${formatorange}TO DISPLAY HELP MESSAGE TYPE: \${formatgreen}\${script_path} -h\${format}\"
 fi
 # Display exit message
@@ -234,7 +381,7 @@ fi
 if [ \${show_time} == 'yes' 2>/dev/null ]; then # Script time message
 script_time_func 2>/dev/null
 fi
-printf \"\${formatReset}\n\"
+printf \"\${formatreset}\n\"
 exit \${exit_type}
 }
 
@@ -248,45 +395,861 @@ clear	# Clears screen unless activation of input option: -cs
 fi
 
 color_formats # Activates or inhibits colorful output
-invalid_input_message # Display invalid inputs
 
-# Display help message or open file
-if [ \${activate_help} == 'yes' ]; then
-script_usage
-elif [ \${open_script} == 'yes' ]; then
-echo \"\${formatorange}SCRIPT: \${formatgreen}\${script_path}\${format}\"
-	for i_text_editor in \${text_editors[@]}; do
-	\${i_text_editor} \${script_path} 2>/dev/null
-		if [ \$? -eq 0 ]; then
-		exit_message 0 -nm -nt
-		else
-		echo \"\${formatred}INVALID TEXT EDITOR: \${formatorange}\${i_text_editor}\${format}\"
-		fi
-	done
-echo \"\${formatred}NO VALID TEXT EDITORS IN '\${formatorange}text_editors\${formatred}' VARIABLE\${format}\"
-exit_message 0 -nt
+# Exit script if invalid inputs found
+if [ \${#bad_inputs[@]} -gt 0 ]; then
+re_enter_input_message \${bad_inputs[@]}
+exit_message 1
 fi
 
-exit_message 0" > ${filename} # Outputs script
+create_option_file # create .ini file
 
-chmod ${perm_val} ${filename} # Automatically activates script
-echo "${formatgreen}CREATED: ${formatorange}${file_path}${format}"
+if [ \${activate_help} == 'yes' ]; then # -h or --help
+script_usage
+elif [ \${open_script} == 'yes' ]; then # -o or --open
+open_text_editor \${script_path} \${text_editors[@]}
+exit_message 0 -nm -nt
+elif [ \${list_settings} == 'yes' 2>/dev/null ]; then # -l option
+list_user_settings
+elif [ \${reset_template} == 'yes' 2>/dev/null ]; then # -r option
+open_text_editor \${option_file} \${text_editors[@]}
+reset_option_file
+exit_message 0
+fi
 
-# Opens file in first valid text editor
-open_file ${filename}
+exit_message 0" 
+}
+
+create_script2 () { # Advanced script WITHOUT option file
+echo "#!/bin/bash
+#--------------------------------------------------------------------------------------#
+# Created: $todays_date By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: $todays_date By: Evan Layher
+#--------------------------------------------------------------------------------------#
+#
+#-------------------------------- VARIABLES --------------------------------#
+
+
+#--------------------------- DEFAULT SETTINGS ------------------------------#
+max_bg_jobs='10' # '10': Max number of background processes
+text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
+
+#----------------------- GENERAL SCRIPT VARIABLES --------------------------#
+script_start_time=\`date +%s\` 		# Script start time (in seconds).
+script_start_date_time=\`date +%x' '%r\`	# Script start date and time: (e.g. 01/01/2015 12:00:00 AM)
+todays_date=\`date +%Y%m%d\`		# Date: (e.g. 20150101)
+script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
+version_number='1.0'
+
+activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
+activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
+clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
+display_exit='yes'	# 'yes': Displays an exit message ['yes' or 'no'] [INPUT: '-nm']
+open_script='no'	# 'no': Opens this script ['yes' or 'no'] [INPUT: '-o' or '--open']
+show_time='yes'		# 'yes': Displays script process time ['yes' or 'no'] [INPUT: '-nt']
+suggest_help='no'	# 'no': Suggests help if needed ['yes' or 'no']
+
+bad_inputs=()		# (): Array of bad inputs (invalid_input_message)
+
+#-------------------------------- FUNCTIONS --------------------------------#
+control_bg_jobs () { # Controls number of background processes
+job_count=\`jobs -p |wc -l\`
+if [ \${job_count} -ge \${max_bg_jobs} ]; then
+sleep 0.25
+control_bg_jobs
+fi
 }
 
 option_eval () { # Evaluates command line options
-if [ ${1} == '-cs' 2>/dev/null ] || [ ${1} == '-h' 2>/dev/null ] || [ ${1} == '--help' 2>/dev/null ] || [ ${1} == '-nc' 2>/dev/null ] || [ ${1} == '-o' 2>/dev/null ] || [ ${1} == '--open' 2>/dev/null ] || [ ${1} == '-p' 2>/dev/null ]; then
+if [ \${1} == '-cs' 2>/dev/null ] || [ \${1} == '-h' 2>/dev/null ] || [ \${1} == '--help' 2>/dev/null ] || \\
+[ \${1} == '-nc' 2>/dev/null ] || [ \${1} == '-nt' 2>/dev/null ] || [ \${1} == '-nm' 2>/dev/null ] || \\
+[ \${1} == '-o' 2>/dev/null ] || [ \${1} == '--open' 2>/dev/null ]; then
+activate_options \${1}
+elif [ \${1:0:1} == '-' 2>/dev/null ]; then
+bad_inputs+=(\"\${1}\")
+else
+bad_inputs+=(\"\${1}\")
+fi
+}
+
+activate_options () {
+if [ \${1} == '-cs' ]; then
+clear_screen='no'	# Do not clear screen
+elif [ \${1} == '-h' ] || [ \${1} == '--help' ]; then
+activate_help='yes'	# Display help message
+elif [ \${1} == '-nc' ]; then
+activate_colors='no'	# Do not display in color
+elif [ \${1} == '-nm' ]; then
+display_exit='no'	# Do not display exit message
+elif [ \${1} == '-nt' ]; then
+show_time='no'		# Do not display script process time
+elif [ \${1} == '-o' ] || [ \${1} == '--open' ]; then
+open_script='yes'	# Open this script
+else
+bad_inputs+=(\"ERROR:activate_options:\${1}\")
+fi
+}
+
+color_formats () { # Print colorful terminal text
+if [ \${activate_colors} == 'yes' 2>/dev/null ]; then
+format=\`tput setab 0; tput setaf 7\` 	 	# Black background, white text
+formatblue=\`tput setab 0; tput setaf 4\`  	# Black background, blue text
+formatgreen=\`tput setab 0; tput setaf 2\` 	# Black background, green text
+formatorange=\`tput setab 0; tput setaf 3\`  	# Black background, orange text
+formatred=\`tput setab 0; tput setaf 1\` 	# Black background, red text
+formatreset=\`tput sgr0\`				# Reset to default terminal settings
+else
+format=''	# No formatting
+formatblue=''	# No formatting
+formatgreen=''	# No formatting
+formatorange=''	# No formatting
+formatred=''	# No formatting
+fi
+}
+
+open_text_editor () { # Open file [first input file, then text editors]
+file_to_open=\${1}
+valid_text_editor='no'
+if [ -f \${file_to_open} ]; then
+	for i_text_editor in \${@:2}; do
+	\${i_text_editor} \${file_to_open} 2>/dev/null &
+	check_text_pid=(\`ps --no-headers -p \$!\`) # Check pid is running
+		if [ \${#check_text_pid[@]} -gt 0 ]; then
+		valid_text_editor='yes'
+		break
+		fi
+	done
+	if [ \${valid_text_editor} == 'no' 2>/dev/null ]; then
+	echo \"\${formatred}NO VALID TEXT EDITORS: \${formatorange}\${@:2}\${format}\"
+	exit_message 99 -nh -nm -nt
+	fi
+else
+echo \"\${formatred}MISSING FILE: \${formatorange}\${file_to_open}\${format}\"
+fi
+}
+
+vital_command () { # exits script if an essential command fails
+command_status=\${1}
+command_line_number=\${2}
+if ! [ -z \${command_status} ] && [ \${command_status} -ne 0 ]; then
+echo \"\${formatred}INVALID COMMAND: LINE \${formatorange}\${command_line_number}\${format}\"
+exit_message 98 -nh -nm -nt
+fi
+}
+
+vital_file () { # exits script if an essential file is missing
+bad_files=()	# Array of bad files
+for vitals; do
+	if ! [ -e \${vitals} 2>/dev/null ]; then
+	bad_files+=(\"\${vitals}\")
+	fi
+done
+
+if [ \${#bad_files[@]} -gt 0 ]; then
+echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
+printf '%s\n' \${bad_files[@]}
+exit_message 97 -nh -nm -nt
+fi
+}
+
+#-------------------------------- MESSAGES ---------------------------------#
+script_usage () { # Script explanation
+echo \"\${formatred}HELP MESSAGE: \${formatgreen}\${script_path}\${format}
+\${formatorange}DESCRIPTION\${format}:
+     
+\${formatorange}ADVICE\${format}: Create an alias inside your \${formatorange}\${HOME}/.bashrc\${format} file
+(e.g. \${formatgreen}alias xx='\${script_path}'\${format})
+     
+\${formatorange}USAGE\${format}:
+ [\${formatorange}1\${format}] \${formatgreen}\${script_path}\${format}
+     
+\${formatorange}OPTIONS\${format}: Can input multiple options in any order
+ \${formatblue}-cs\${format}  Prevent screen from clearing before script processes
+ \${formatblue}-h\${format} or \${formatblue}--help\${format}  Display this message
+ \${formatblue}-nc\${format}  Prevent color printing in terminal
+ \${formatblue}-nm\${format}  Prevent exit message from displaying
+ \${formatblue}-nt\${format}  Prevent script process time from displaying
+ \${formatblue}-o\${format} or \${formatblue}--open\${format} Open this script
+     
+\${formatorange}DEFAULT SETTINGS\${format}:
+ text editors: \${formatgreen}\${text_editors[@]}\${format}
+     
+\${formatorange}VERSION: \${formatgreen}\${version_number}\${format}
+\${formatred}END OF HELP: \${formatgreen}\${script_path}\${format}\"
+exit_message 0 -nt -nm
+}
+
+re_enter_input_message () { # Displays invalid input message
+clear
+echo \"\${formatred}INVALID INPUT: \${formatorange}\${@}\${format}\"
+echo \"\${formatblue}PLEASE RE-ENTER INPUT\${format}\"
+}
+
+script_time_message () { # Script process time message
+echo \"STARTED : \${script_start_date_time}\"
+echo \"FINISHED: \`date +%x' '%r\`\"
+}
+
+script_time_func () { # Script process time calculation
+script_end_time=\`date +%s\`
+script_process_time=\$((\${script_end_time} - \${script_start_time}))
+if [ \${script_process_time} -lt 60 ];then
+script_time_message 
+echo \"PROCESS TIME: \${script_process_time} second(s).\"
+elif [ \${script_process_time} -lt 3600 ];then
+script_time_message 
+echo \"PROCESS TIME: \$((\${script_process_time} / 60)) minute(s) and \$((\${script_process_time} % 60)) second(s).\"
+elif [ \${script_process_time} -lt 86400 ];then
+script_time_message 
+echo \"PROCESS TIME: \$((\${script_process_time} / 3600)) hour(s) \$((\${script_process_time} % 3600 / 60)) minute(s) and \$((\${script_process_time} % 60)) second(s).\"
+elif [ \${script_process_time} -ge 86400 ];then
+script_time_message 
+echo \"PROCESS TIME: \$((\${script_process_time} / 86400)) day(s) \$((\${script_process_time} % 86400 / 3600)) hour(s) \$((\${script_process_time} % 3600 / 60)) minute(s) and \$((\${script_process_time} % 60)) second(s).\"
+else
+echo \"\${formatred}ERROR: \${formatorange}script_time_func\${format}\"
+fi
+}
+
+exit_message () { # Message before exiting script
+if [ -z \${1} 2>/dev/null ] || ! [ \${1} -eq \${1} 2>/dev/null ]; then
+exit_type='0'
+else
+exit_type=\${1}
+fi
+if [ \${exit_type} -ne 0 ]; then
+suggest_help='yes'
+fi
+for exit_inputs; do
+	if [ \${exit_inputs} == '-nh' 2>/dev/null ]; then
+	suggest_help='no'
+	elif [ \${exit_inputs} == '-nt' 2>/dev/null ]; then
+	show_time='no'
+	elif [ \${exit_inputs} == '-nm' 2>/dev/null ]; then
+	display_exit='no'
+	fi
+done
+wait # Waits for background processes to finish before exiting
+# Suggest help message
+if [ \${suggest_help} == 'yes' 2>/dev/null ]; then
+echo \"\${formatorange}TO DISPLAY HELP MESSAGE TYPE: \${formatgreen}\${script_path} -h\${format}\"
+fi
+# Display exit message
+if [ \${display_exit} != 'no' 2>/dev/null ]; then # Exit message
+echo \"\${formatblue}EXITING SCRIPT:\${formatorange} \${script_path}\${format}\"
+fi
+# Display script process time
+if [ \${show_time} == 'yes' 2>/dev/null ]; then # Script time message
+script_time_func 2>/dev/null
+fi
+printf \"\${formatreset}\n\"
+exit \${exit_type}
+}
+
+#---------------------------------- CODE -----------------------------------#
+for inputs; do # Reads through all inputs
+option_eval \${inputs}
+done
+
+if [ \${clear_screen} != 'no' 2>/dev/null ]; then
+clear	# Clears screen unless activation of input option: -cs
+fi
+
+color_formats # Activates or inhibits colorful output
+
+# Exit script if invalid inputs found
+if [ \${#bad_inputs[@]} -gt 0 ]; then
+re_enter_input_message \${bad_inputs[@]}
+exit_message 1
+fi
+
+if [ \${activate_help} == 'yes' ]; then # -h or --help
+script_usage
+elif [ \${open_script} == 'yes' ]; then # -o or --open
+open_text_editor \${script_path} \${text_editors[@]}
+exit_message 0 -nm -nt
+fi
+
+exit_message 0" 
+}
+
+create_script3 () { # Advanced script WITHOUT option file OR time calculation
+echo "#!/bin/bash
+#--------------------------------------------------------------------------------------#
+# Created: $todays_date By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: $todays_date By: Evan Layher
+#--------------------------------------------------------------------------------------#
+#
+#-------------------------------- VARIABLES --------------------------------#
+
+
+#--------------------------- DEFAULT SETTINGS ------------------------------#
+max_bg_jobs='10' # '10': Max number of background processes
+text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
+
+#----------------------- GENERAL SCRIPT VARIABLES --------------------------#
+todays_date=\`date +%Y%m%d\`		# Date: (e.g. 20150101)
+script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
+version_number='1.0'
+
+activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
+activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
+clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
+display_exit='yes'	# 'yes': Displays an exit message ['yes' or 'no'] [INPUT: '-nm']
+open_script='no'	# 'no': Opens this script ['yes' or 'no'] [INPUT: '-o' or '--open']
+suggest_help='no'	# 'no': Suggests help if needed ['yes' or 'no']
+
+bad_inputs=()		# (): Array of bad inputs (invalid_input_message)
+
+#-------------------------------- FUNCTIONS --------------------------------#
+control_bg_jobs () { # Controls number of background processes
+job_count=\`jobs -p |wc -l\`
+if [ \${job_count} -ge \${max_bg_jobs} ]; then
+sleep 0.25
+control_bg_jobs
+fi
+}
+
+option_eval () { # Evaluates command line options
+if [ \${1} == '-cs' 2>/dev/null ] || [ \${1} == '-h' 2>/dev/null ] || [ \${1} == '--help' 2>/dev/null ] || \\
+[ \${1} == '-nc' 2>/dev/null ] || [ \${1} == '-nm' 2>/dev/null ] || [ \${1} == '-o' 2>/dev/null ] || \\
+[ \${1} == '--open' 2>/dev/null ]; then
+activate_options \${1}
+elif [ \${1:0:1} == '-' 2>/dev/null ]; then
+bad_inputs+=(\"\${1}\")
+else
+bad_inputs+=(\"\${1}\")
+fi
+}
+
+activate_options () {
+if [ \${1} == '-cs' ]; then
+clear_screen='no'	# Do not clear screen
+elif [ \${1} == '-h' ] || [ \${1} == '--help' ]; then
+activate_help='yes'	# Display help message
+elif [ \${1} == '-nc' ]; then
+activate_colors='no'	# Do not display in color
+elif [ \${1} == '-nm' ]; then
+display_exit='no'	# Do not display exit message
+elif [ \${1} == '-o' ] || [ \${1} == '--open' ]; then
+open_script='yes'	# Open this script
+else
+bad_inputs+=(\"ERROR:activate_options:\${1}\")
+fi
+}
+
+color_formats () { # Print colorful terminal text
+if [ \${activate_colors} == 'yes' 2>/dev/null ]; then
+format=\`tput setab 0; tput setaf 7\` 	 	# Black background, white text
+formatblue=\`tput setab 0; tput setaf 4\`  	# Black background, blue text
+formatgreen=\`tput setab 0; tput setaf 2\` 	# Black background, green text
+formatorange=\`tput setab 0; tput setaf 3\`  	# Black background, orange text
+formatred=\`tput setab 0; tput setaf 1\` 	# Black background, red text
+formatreset=\`tput sgr0\`				# Reset to default terminal settings
+else
+format=''	# No formatting
+formatblue=''	# No formatting
+formatgreen=''	# No formatting
+formatorange=''	# No formatting
+formatred=''	# No formatting
+fi
+}
+
+open_text_editor () { # Open file [first input file, then text editors]
+file_to_open=\${1}
+valid_text_editor='no'
+if [ -f \${file_to_open} ]; then
+	for i_text_editor in \${@:2}; do
+	\${i_text_editor} \${file_to_open} 2>/dev/null &
+	check_text_pid=(\`ps --no-headers -p \$!\`) # Check pid is running
+		if [ \${#check_text_pid[@]} -gt 0 ]; then
+		valid_text_editor='yes'
+		break
+		fi
+	done
+	if [ \${valid_text_editor} == 'no' 2>/dev/null ]; then
+	echo \"\${formatred}NO VALID TEXT EDITORS: \${formatorange}\${@:2}\${format}\"
+	exit_message 99 -nh -nm
+	fi
+else
+echo \"\${formatred}MISSING FILE: \${formatorange}\${file_to_open}\${format}\"
+fi
+}
+
+vital_command () { # exits script if an essential command fails
+command_status=\${1}
+command_line_number=\${2}
+if ! [ -z \${command_status} ] && [ \${command_status} -ne 0 ]; then
+echo \"\${formatred}INVALID COMMAND: LINE \${formatorange}\${command_line_number}\${format}\"
+exit_message 98 -nh -nm
+fi
+}
+
+vital_file () { # exits script if an essential file is missing
+bad_files=()	# Array of bad files
+for vitals; do
+	if ! [ -e \${vitals} 2>/dev/null ]; then
+	bad_files+=(\"\${vitals}\")
+	fi
+done
+
+if [ \${#bad_files[@]} -gt 0 ]; then
+echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
+printf '%s\n' \${bad_files[@]}
+exit_message 97 -nh -nm
+fi
+}
+
+#-------------------------------- MESSAGES ---------------------------------#
+script_usage () { # Script explanation
+echo \"\${formatred}HELP MESSAGE: \${formatgreen}\${script_path}\${format}
+\${formatorange}DESCRIPTION\${format}:
+     
+\${formatorange}ADVICE\${format}: Create an alias inside your \${formatorange}\${HOME}/.bashrc\${format} file
+(e.g. \${formatgreen}alias xx='\${script_path}'\${format})
+     
+\${formatorange}USAGE\${format}:
+ [\${formatorange}1\${format}] \${formatgreen}\${script_path}\${format}
+     
+\${formatorange}OPTIONS\${format}: Can input multiple options in any order
+ \${formatblue}-cs\${format}  Prevent screen from clearing before script processes
+ \${formatblue}-h\${format} or \${formatblue}--help\${format}  Display this message
+ \${formatblue}-nc\${format}  Prevent color printing in terminal
+ \${formatblue}-nm\${format}  Prevent exit message from displaying
+ \${formatblue}-o\${format} or \${formatblue}--open\${format} Open this script
+     
+\${formatorange}DEFAULT SETTINGS\${format}:
+ text editors: \${formatgreen}\${text_editors[@]}\${format}
+     
+\${formatorange}VERSION: \${formatgreen}\${version_number}\${format}
+\${formatred}END OF HELP: \${formatgreen}\${script_path}\${format}\"
+exit_message 0 -nm
+}
+
+re_enter_input_message () { # Displays invalid input message
+clear
+echo \"\${formatred}INVALID INPUT: \${formatorange}\${@}\${format}\"
+echo \"\${formatblue}PLEASE RE-ENTER INPUT\${format}\"
+}
+
+exit_message () { # Message before exiting script
+if [ -z \${1} 2>/dev/null ] || ! [ \${1} -eq \${1} 2>/dev/null ]; then
+exit_type='0'
+else
+exit_type=\${1}
+fi
+if [ \${exit_type} -ne 0 ]; then
+suggest_help='yes'
+fi
+for exit_inputs; do
+	if [ \${exit_inputs} == '-nh' 2>/dev/null ]; then
+	suggest_help='no'
+	elif [ \${exit_inputs} == '-nm' 2>/dev/null ]; then
+	display_exit='no'
+	fi
+done
+wait # Waits for background processes to finish before exiting
+# Suggest help message
+if [ \${suggest_help} == 'yes' 2>/dev/null ]; then
+echo \"\${formatorange}TO DISPLAY HELP MESSAGE TYPE: \${formatgreen}\${script_path} -h\${format}\"
+fi
+# Display exit message
+if [ \${display_exit} != 'no' 2>/dev/null ]; then # Exit message
+echo \"\${formatblue}EXITING SCRIPT:\${formatorange} \${script_path}\${format}\"
+fi
+printf \"\${formatreset}\n\"
+exit \${exit_type}
+}
+
+#---------------------------------- CODE -----------------------------------#
+for inputs; do # Reads through all inputs
+option_eval \${inputs}
+done
+
+if [ \${clear_screen} != 'no' 2>/dev/null ]; then
+clear	# Clears screen unless activation of input option: -cs
+fi
+
+color_formats # Activates or inhibits colorful output
+
+# Exit script if invalid inputs found
+if [ \${#bad_inputs[@]} -gt 0 ]; then
+re_enter_input_message \${bad_inputs[@]}
+exit_message 1
+fi
+
+if [ \${activate_help} == 'yes' ]; then # -h or --help
+script_usage
+elif [ \${open_script} == 'yes' ]; then # -o or --open
+open_text_editor \${script_path} \${text_editors[@]}
+exit_message 0 -nm
+fi
+
+exit_message 0" 
+}
+
+create_script4 () { # Basic script with exit message
+echo "#!/bin/bash
+#--------------------------------------------------------------------------------------#
+# Created: $todays_date By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: $todays_date By: Evan Layher
+#--------------------------------------------------------------------------------------#
+#
+#-------------------------------- VARIABLES --------------------------------#
+
+
+#--------------------------- DEFAULT SETTINGS ------------------------------#
+text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
+
+#----------------------- GENERAL SCRIPT VARIABLES --------------------------#
+todays_date=\`date +%Y%m%d\`		# Date: (e.g. 20150101)
+script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
+version_number='1.0'
+
+activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
+activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
+clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
+display_exit='yes'	# 'yes': Displays an exit message ['yes' or 'no'] [INPUT: '-nm']
+open_script='no'	# 'no': Opens this script ['yes' or 'no'] [INPUT: '-o' or '--open']
+suggest_help='no'	# 'no': Suggests help if needed ['yes' or 'no']
+
+bad_inputs=()		# (): Array of bad inputs (invalid_input_message)
+
+#-------------------------------- FUNCTIONS --------------------------------#
+option_eval () { # Evaluates command line options
+if [ \${1} == '-cs' 2>/dev/null ] || [ \${1} == '-h' 2>/dev/null ] || [ \${1} == '--help' 2>/dev/null ] || \\
+[ \${1} == '-nc' 2>/dev/null ] || [ \${1} == '-nm' 2>/dev/null ] || [ \${1} == '-o' 2>/dev/null ] || \\
+[ \${1} == '--open' 2>/dev/null ]; then
+activate_options \${1}
+elif [ \${1:0:1} == '-' 2>/dev/null ]; then
+bad_inputs+=(\"\${1}\")
+else
+bad_inputs+=(\"\${1}\")
+fi
+}
+
+activate_options () {
+if [ \${1} == '-cs' ]; then
+clear_screen='no'	# Do not clear screen
+elif [ \${1} == '-h' ] || [ \${1} == '--help' ]; then
+activate_help='yes'	# Display help message
+elif [ \${1} == '-nc' ]; then
+activate_colors='no'	# Do not display in color
+elif [ \${1} == '-nm' ]; then
+display_exit='no'	# Do not display exit message
+elif [ \${1} == '-o' ] || [ \${1} == '--open' ]; then
+open_script='yes'	# Open this script
+else
+bad_inputs+=(\"ERROR:activate_options:\${1}\")
+fi
+}
+
+color_formats () { # Print colorful terminal text
+if [ \${activate_colors} == 'yes' 2>/dev/null ]; then
+format=\`tput setab 0; tput setaf 7\` 	 	# Black background, white text
+formatblue=\`tput setab 0; tput setaf 4\`  	# Black background, blue text
+formatgreen=\`tput setab 0; tput setaf 2\` 	# Black background, green text
+formatorange=\`tput setab 0; tput setaf 3\`  	# Black background, orange text
+formatred=\`tput setab 0; tput setaf 1\` 	# Black background, red text
+formatreset=\`tput sgr0\`				# Reset to default terminal settings
+else
+format=''	# No formatting
+formatblue=''	# No formatting
+formatgreen=''	# No formatting
+formatorange=''	# No formatting
+formatred=''	# No formatting
+fi
+}
+
+open_text_editor () { # Open file [first input file, then text editors]
+file_to_open=\${1}
+valid_text_editor='no'
+if [ -f \${file_to_open} ]; then
+	for i_text_editor in \${@:2}; do
+	\${i_text_editor} \${file_to_open} 2>/dev/null &
+	check_text_pid=(\`ps --no-headers -p \$!\`) # Check pid is running
+		if [ \${#check_text_pid[@]} -gt 0 ]; then
+		valid_text_editor='yes'
+		break
+		fi
+	done
+	if [ \${valid_text_editor} == 'no' 2>/dev/null ]; then
+	echo \"\${formatred}NO VALID TEXT EDITORS: \${formatorange}\${@:2}\${format}\"
+	exit_message 99 -nh -nm
+	fi
+else
+echo \"\${formatred}MISSING FILE: \${formatorange}\${file_to_open}\${format}\"
+fi
+}
+
+#-------------------------------- MESSAGES ---------------------------------#
+script_usage () { # Script explanation
+echo \"\${formatred}HELP MESSAGE: \${formatgreen}\${script_path}\${format}
+\${formatorange}DESCRIPTION\${format}:
+     
+\${formatorange}ADVICE\${format}: Create an alias inside your \${formatorange}\${HOME}/.bashrc\${format} file
+(e.g. \${formatgreen}alias xx='\${script_path}'\${format})
+     
+\${formatorange}USAGE\${format}:
+ [\${formatorange}1\${format}] \${formatgreen}\${script_path}\${format}
+     
+\${formatorange}OPTIONS\${format}: Can input multiple options in any order
+ \${formatblue}-cs\${format}  Prevent screen from clearing before script processes
+ \${formatblue}-h\${format} or \${formatblue}--help\${format}  Display this message
+ \${formatblue}-nc\${format}  Prevent color printing in terminal
+ \${formatblue}-nm\${format}  Prevent exit message from displaying
+ \${formatblue}-o\${format} or \${formatblue}--open\${format} Open this script
+     
+\${formatorange}DEFAULT SETTINGS\${format}:
+ text editors: \${formatgreen}\${text_editors[@]}\${format}
+     
+\${formatorange}VERSION: \${formatgreen}\${version_number}\${format}
+\${formatred}END OF HELP: \${formatgreen}\${script_path}\${format}\"
+exit_message 0 -nm
+}
+
+re_enter_input_message () { # Displays invalid input message
+clear
+echo \"\${formatred}INVALID INPUT: \${formatorange}\${@}\${format}\"
+echo \"\${formatblue}PLEASE RE-ENTER INPUT\${format}\"
+}
+
+exit_message () { # Message before exiting script
+if [ -z \${1} 2>/dev/null ] || ! [ \${1} -eq \${1} 2>/dev/null ]; then
+exit_type='0'
+else
+exit_type=\${1}
+fi
+if [ \${exit_type} -ne 0 ]; then
+suggest_help='yes'
+fi
+for exit_inputs; do
+	if [ \${exit_inputs} == '-nh' 2>/dev/null ]; then
+	suggest_help='no'
+	elif [ \${exit_inputs} == '-nm' 2>/dev/null ]; then
+	display_exit='no'
+	fi
+done
+wait # Waits for background processes to finish before exiting
+# Suggest help message
+if [ \${suggest_help} == 'yes' 2>/dev/null ]; then
+echo \"\${formatorange}TO DISPLAY HELP MESSAGE TYPE: \${formatgreen}\${script_path} -h\${format}\"
+fi
+# Display exit message
+if [ \${display_exit} != 'no' 2>/dev/null ]; then # Exit message
+echo \"\${formatblue}EXITING SCRIPT:\${formatorange} \${script_path}\${format}\"
+fi
+printf \"\${formatreset}\n\"
+exit \${exit_type}
+}
+
+#---------------------------------- CODE -----------------------------------#
+for inputs; do # Reads through all inputs
+option_eval \${inputs}
+done
+
+if [ \${clear_screen} != 'no' 2>/dev/null ]; then
+clear	# Clears screen unless activation of input option: -cs
+fi
+
+color_formats # Activates or inhibits colorful output
+
+# Exit script if invalid inputs found
+if [ \${#bad_inputs[@]} -gt 0 ]; then
+re_enter_input_message \${bad_inputs[@]}
+exit_message 1
+fi
+
+if [ \${activate_help} == 'yes' ]; then # -h or --help
+script_usage
+elif [ \${open_script} == 'yes' ]; then # -o or --open
+open_text_editor \${script_path} \${text_editors[@]}
+exit_message 0 -nm
+fi
+
+exit_message 0" 
+}
+
+create_script5 () { # Basic script WITHOUT exit message
+echo "#!/bin/bash
+#--------------------------------------------------------------------------------------#
+# Created: $todays_date By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: $todays_date By: Evan Layher
+#--------------------------------------------------------------------------------------#
+#
+#-------------------------------- VARIABLES --------------------------------#
+
+
+#--------------------------- DEFAULT SETTINGS ------------------------------#
+text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
+
+#----------------------- GENERAL SCRIPT VARIABLES --------------------------#
+todays_date=\`date +%Y%m%d\`		# Date: (e.g. 20150101)
+script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
+
+activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
+activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
+clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
+display_exit='yes'	# 'yes': Displays an exit message ['yes' or 'no'] [INPUT: '-nm']
+open_script='no'	# 'no': Opens this script ['yes' or 'no'] [INPUT: '-o' or '--open']
+suggest_help='no'	# 'no': Suggests help if needed ['yes' or 'no']
+
+bad_inputs=()		# (): Array of bad inputs (invalid_input_message)
+
+#-------------------------------- FUNCTIONS --------------------------------#
+option_eval () { # Evaluates command line options
+if [ \${1} == '-cs' 2>/dev/null ] || [ \${1} == '-h' 2>/dev/null ] || [ \${1} == '--help' 2>/dev/null ] || \\
+[ \${1} == '-nc' 2>/dev/null ] || [ \${1} == '-o' 2>/dev/null ] || [ \${1} == '--open' 2>/dev/null ]; then
+activate_options \${1}
+elif [ \${1:0:1} == '-' 2>/dev/null ]; then
+bad_inputs+=(\"\${1}\")
+else
+bad_inputs+=(\"\${1}\")
+fi
+}
+
+activate_options () {
+if [ \${1} == '-cs' ]; then
+clear_screen='no'	# Do not clear screen
+elif [ \${1} == '-h' ] || [ \${1} == '--help' ]; then
+activate_help='yes'	# Display help message
+elif [ \${1} == '-nc' ]; then
+activate_colors='no'	# Do not display in color
+elif [ \${1} == '-o' ] || [ \${1} == '--open' ]; then
+open_script='yes'	# Open this script
+else
+bad_inputs+=(\"ERROR:activate_options:\${1}\")
+fi
+}
+
+color_formats () { # Print colorful terminal text
+if [ \${activate_colors} == 'yes' 2>/dev/null ]; then
+format=\`tput setab 0; tput setaf 7\` 	 	# Black background, white text
+formatblue=\`tput setab 0; tput setaf 4\`  	# Black background, blue text
+formatgreen=\`tput setab 0; tput setaf 2\` 	# Black background, green text
+formatorange=\`tput setab 0; tput setaf 3\`  	# Black background, orange text
+formatred=\`tput setab 0; tput setaf 1\` 	# Black background, red text
+formatreset=\`tput sgr0\`				# Reset to default terminal settings
+else
+format=''	# No formatting
+formatblue=''	# No formatting
+formatgreen=''	# No formatting
+formatorange=''	# No formatting
+formatred=''	# No formatting
+fi
+}
+
+open_text_editor () { # Open file [first input file, then text editors]
+file_to_open=\${1}
+valid_text_editor='no'
+if [ -f \${file_to_open} ]; then
+	for i_text_editor in \${@:2}; do
+	\${i_text_editor} \${file_to_open} 2>/dev/null &
+	check_text_pid=(\`ps --no-headers -p \$!\`) # Check pid is running
+		if [ \${#check_text_pid[@]} -gt 0 ]; then
+		valid_text_editor='yes'
+		break
+		fi
+	done
+	if [ \${valid_text_editor} == 'no' 2>/dev/null ]; then
+	echo \"\${formatred}NO VALID TEXT EDITORS: \${formatorange}\${@:2}\${format}\"
+	exit_message 99
+	fi
+else
+echo \"\${formatred}MISSING FILE: \${formatorange}\${file_to_open}\${format}\"
+fi
+}
+
+#-------------------------------- MESSAGES ---------------------------------#
+script_usage () { # Script explanation
+echo \"\${formatred}HELP MESSAGE: \${formatgreen}\${script_path}\${format}
+\${formatorange}DESCRIPTION\${format}:
+     
+\${formatorange}USAGE\${format}:
+ [\${formatorange}1\${format}] \${formatgreen}\${script_path}\${format}
+     
+\${formatorange}OPTIONS\${format}: Can input multiple options in any order
+ \${formatblue}-cs\${format}  Prevent screen from clearing before script processes
+ \${formatblue}-h\${format} or \${formatblue}--help\${format}  Display this message
+ \${formatblue}-nc\${format}  Prevent color printing in terminal
+ \${formatblue}-o\${format} or \${formatblue}--open\${format} Open this script
+     
+\${formatorange}DEFAULT SETTINGS\${format}:
+ text editors: \${formatgreen}\${text_editors[@]}\${format}
+     
+\${formatred}END OF HELP: \${formatgreen}\${script_path}\${format}\"
+exit_message 0
+}
+
+re_enter_input_message () { # Displays invalid input message
+clear
+echo \"\${formatred}INVALID INPUT: \${formatorange}\${@}\${format}\"
+echo \"\${formatblue}PLEASE RE-ENTER INPUT\${format}\"
+}
+
+exit_message () { # Message before exiting script
+if [ -z \${1} 2>/dev/null ] || ! [ \${1} -eq \${1} 2>/dev/null ]; then
+exit_type='0'
+else
+exit_type=\${1}
+fi
+printf \"\${formatreset}\n\"
+exit \${exit_type}
+}
+
+#---------------------------------- CODE -----------------------------------#
+for inputs; do # Reads through all inputs
+option_eval \${inputs}
+done
+
+if [ \${clear_screen} != 'no' 2>/dev/null ]; then
+clear	# Clears screen unless activation of input option: -cs
+fi
+
+color_formats # Activates or inhibits colorful output
+
+# Exit script if invalid inputs found
+if [ \${#bad_inputs[@]} -gt 0 ]; then
+re_enter_input_message \${bad_inputs[@]}
+exit_message 1
+fi
+
+if [ \${activate_help} == 'yes' ]; then # -h or --help
+script_usage
+elif [ \${open_script} == 'yes' ]; then # -o or --open
+open_text_editor \${script_path} \${text_editors[@]}
+exit_message 0
+fi
+
+exit_message 0" 
+}
+
+option_eval () { # Evaluates command line options
+if [ ${1} == '-h' 2>/dev/null ] || [ ${1} == '--help' 2>/dev/null ] || [ ${1} == '-l' 2>/dev/null ] || \
+[ ${1} == '-n' 2>/dev/null ] || [ ${1} == '-nc' 2>/dev/null ] || [ ${1} == '-nl' 2>/dev/null ] || \
+[ ${1} == '-o' 2>/dev/null ] || [ ${1} == '--open' 2>/dev/null ] || [ ${1} == '-p' 2>/dev/null ] || \
+[ ${1} == '-t' 2>/dev/null ] || [ ${1} == '-tr' 2>/dev/null ] || [ ${1} == '-r' 2>/dev/null ]; then
 activate_options ${1}
-elif [ ${p_in} == 'yes' 2>/dev/null ]; then
+elif ! [ -z ${n_in} 2>/dev/null ] && [ ${n_in} == 'yes' 2>/dev/null ]; then # Add text editors
+	if [ ${1} -eq ${1} 2>/dev/null ] && [ ${1} -gt 0 2>/dev/null ] && [ -z ${n_script} 2>/dev/null ]; then
+	n_script=${1}
+	else
+	bad_inputs+=("-n:${1}")
+	fi
+elif ! [ -z ${p_in} 2>/dev/null ] && [ ${p_in} == 'yes' 2>/dev/null ]; then
 check_p_value=`echo ${1} |grep '[0-7][0-7][0-7]'` # 3 digit file permission code
-	if ! [ -z ${check_p_value} ] && [ ${#check_p_value} -eq 3 ]; then
-	perm_val=${1}
+	if ! [ -z ${check_p_value} ] && [ ${#check_p_value} -eq 3 ] && [ -z ${old_p_value} 2>/dev/null ]; then
+	create_option_file
+	old_p_value=`grep '^permission_value=' ${option_file}`
+	sed -i "s@${old_p_value}@permission_value=${1}@g" ${option_file}
 	else
 	bad_inputs+=("-p:${1}")
 	fi
-p_in='no'
+elif ! [ -z ${t_in} 2>/dev/null ] && [ ${t_in} == 'yes' 2>/dev/null ]; then # Add text editor
+add_editors=("${1} ${add_editors[@]}") # Maintain order of editor inputs
+elif ! [ -z ${tr_in} 2>/dev/null ] && [ ${tr_in} == 'yes' 2>/dev/null ]; then # Remove text editor
+rem_editors+=("${1}")
+elif [ ${1:0:1} == '-' 2>/dev/null ]; then
+bad_inputs+=("${1}")
 else
 	if [ ${filename_reader} != 'off' 2>/dev/null ]; then
 	filename=${1}
@@ -298,17 +1261,33 @@ fi
 }
 
 activate_options () {
+n_in='no'
 p_in='no'
-if [ ${1} == '-cs' ]; then
-clear_screen='no'	# Do not clear screen
-elif [ ${1} == '-h' ] || [ ${1} == '--help' ]; then
-activate_help='yes'
+t_in='no'
+tr_in='no'
+if [ ${1} == '-h' ] || [ ${1} == '--help' ]; then
+activate_help='yes'	# Display help message
+elif [ ${1} == '-l' ]; then
+list_settings='yes'	# List user settings
+elif [ ${1} == '-n' ]; then
+n_in='yes'		# Which script number to create
 elif [ ${1} == '-nc' ]; then
-activate_colors='no'
+activate_colors='no'	# Do not display in color
+elif [ ${1} == '-nl' ]; then
+display_scripts='yes'	# List script explanations
 elif [ ${1} == '-o' ] || [ ${1} == '--open' ]; then
-open_script='yes'
+open_script='yes'	# Open this script
 elif [ ${1} == '-p' ]; then
-p_in='yes'
+p_in='yes'		# Input new permission value
+list_settings='yes'	# List user settings
+elif [ ${1} == '-r' ]; then
+reset_template='yes'   # Reset option file
+elif [ ${1} == '-t' ]; then
+t_in='yes'		# Add text editor
+list_settings='yes'	# List user settings
+elif [ ${1} == '-tr' ]; then
+tr_in='yes'		# Remove text editor
+list_settings='yes'	# List user settings
 else
 bad_inputs+=("ERROR:activate_options:${1}")
 fi
@@ -318,16 +1297,69 @@ color_formats () { # Print colorful terminal text
 if [ ${activate_colors} == 'yes' 2>/dev/null ]; then
 format=`tput setab 0; tput setaf 7` 	 	# Black background, white text
 formatblue=`tput setab 0; tput setaf 4`  	# Black background, blue text
-formatorange=`tput setab 0; tput setaf 3`  	# Black background, orange text
 formatgreen=`tput setab 0; tput setaf 2` 	# Black background, green text
-formatred=`tput setab 0; tput setaf 1` 		# Black background, red text
-formatReset=`tput sgr0`				# Reset to default terminal settings
+formatorange=`tput setab 0; tput setaf 3`  	# Black background, orange text
+formatred=`tput setab 0; tput setaf 1` 	# Black background, red text
+formatreset=`tput sgr0`				# Reset to default terminal settings
 else
 format=''	# No formatting
 formatblue=''	# No formatting
-formatorange=''	# No formatting
 formatgreen=''	# No formatting
+formatorange=''	# No formatting
 formatred=''	# No formatting
+fi
+}
+
+open_text_editor () { # Open file [first input file, then text editors]
+file_to_open=${1}
+valid_text_editor='no'
+if [ -f ${file_to_open} ]; then
+	for i_text_editor in ${@:2}; do
+	${i_text_editor} ${file_to_open} 2>/dev/null &
+	check_text_pid=(`ps --no-headers -p $!`) # Check pid is running
+		if [ ${#check_text_pid[@]} -gt 0 ]; then
+		valid_text_editor='yes'
+		break
+		fi
+	done
+	if [ ${valid_text_editor} == 'no' 2>/dev/null ]; then
+	echo "${formatred}NO VALID TEXT EDITORS: ${formatorange}${@:2}${format}"
+	exit 99
+	fi
+else
+echo "${formatred}MISSING FILE: ${formatorange}${file_to_open}${format}"
+fi
+}
+
+create_option_file () { # Creates .ini file to store user preferences
+ealayher_code_dir="${HOME}/.ealayher_code" # Directory of preference file
+option_file="${ealayher_code_dir}/`basename ${script_path%.*}`.ini" # .ini file path
+
+if ! [ -d ${ealayher_code_dir} ]; then # Create directory for option file
+mkdir ${ealayher_code_dir}
+fi
+
+if ! [ -f ${option_file} ]; then # Create option file
+echo "[options]
+permission_value=${default_permission_value}
+text_editors=(${default_text_editors[@]})
+" > ${option_file}
+fi
+
+permission_value=(`awk -F '=' '/permission_value=/ {print $2}' ${option_file}`)
+text_editors=(`awk -F '=' '/text_editors=/ {print $2}' ${option_file} |sed -e 's@(@@g' -e 's@)@@g'`)
+
+if [ ${#add_editors[@]} -gt 0 ] || [ ${#rem_editors[@]} -gt 0 ]; then # Change text editors
+old_editor_vals="text_editors=(${text_editors[@]})"
+	for i_rem_editor in ${rem_editors[@]} ${add_editors[@]}; do # Removes duplicate inputs
+	text_editors=(`printf ' %s ' ${text_editors[@]} |sed "s@ ${i_rem_editor} @ @g"`)
+	done
+	for i_add_editor in ${add_editors[@]}; do # Put newest editor in front
+	text_editors=(${i_add_editor} ${text_editors[@]})
+	done
+	new_editor_vals="text_editors=(${text_editors[@]})"
+sed -i "s@${old_editor_vals}@${new_editor_vals}@g" ${option_file}
+text_editors=(`awk -F '=' '/text_editors=/ {print $2}' ${option_file} |sed -e 's@(@@g' -e 's@)@@g'`)
 fi
 }
 
@@ -335,6 +1367,7 @@ prompt_user_input () { # Prompt user to input filename
 printf "${formatorange}INPUT FILENAME (e.g. ${formatgreen}example.sh${formatorange}):${format}"
 read -r filename
 if [ ${#filename} -eq 0 ]; then
+clear
 prompt_user_input
 fi
 }
@@ -363,54 +1396,81 @@ create_script
 fi
 }
 
-open_file () { # Open file in text editor
-input_file=${1}
-if [ -f ${input_file} ]; then
-	for i_text_editor in ${text_editors[@]}; do
-	${i_text_editor} ${input_file} 2>/dev/null
-		if [ $? -eq 0 ]; then
-		exit_message 0
-		else
-		echo "${formatred}INVALID TEXT EDITOR: ${formatorange}${i_text_editor}${format}"
-		fi
-	done
-echo "${formatred}NO VALID TEXT EDITORS IN '${formatorange}text_editors${formatred}' VARIABLE${format}"
+reset_option_file () { # -r: Reset user option file
+printf "${formatorange}RESET OPTIONS FILE? [${formatgreen}y${formatorange}/${formatgreen}n${formatorange}]:${format}"
+read -r reset_it
+if [ ${reset_it} == 'y' 2>/dev/null ] || [ ${reset_it} == 'Y' 2>/dev/null ]; then
+kill $! 2>/dev/null # Close file before removing
+wait $! 2>/dev/null # Suppress kill message
+rm ${option_file} 2>/dev/null
+create_option_file
+elif [ ${reset_it} == 'n' 2>/dev/null ] || [ ${reset_it} == 'N' 2>/dev/null ]; then
+kill $! 2>/dev/null # Close file before removing
+wait $! 2>/dev/null # Suppress kill message
 exit_message 0
 else
-echo "${formatred}MISSING: ${formatorange}${input_file}${format}"
+re_enter_input_message ${reset_it}
+reset_option_file
 fi
 }
+
 #-------------------------------- MESSAGES ---------------------------------#
 script_usage () { # Script explanation
 echo "${formatred}HELP MESSAGE: ${formatgreen}${script_path}${format}
-${formatorange}ADVICE${format}: Create an alias inside your ${HOME}/.bashrc file
+${formatorange}DESCRIPTION${format}: Create script in working directory
+     
+${formatorange}ADVICE${format}: Create an alias inside your ${formatorange}${HOME}/.bashrc${format} file
 (e.g. ${formatgreen}alias kt='${script_path}'${format})
      
 ${formatorange}USAGE${format}: Input filename of new script
-(if alias inside .bashrc file is '${formatgreen}kt${format}')
-kt ${formatgreen}new_script_file_name.sh ${formatorange}[options]...${format}
+  [${formatorange}1${format}] ${formatgreen}${script_path}${formatorange} examplefile1.sh${format}
      
 ${formatorange}OPTIONS${format}: Can input multiple options in any order
-    -cs              Prevent screen from clearing before script processes
-    -h or --help     Display this message
-    -nc              Prevent color printing in terminal
-    -o or --open     Open this script
-    -p               Permission value of output script (3 digit number)
+ ${formatblue}-h${format} or ${formatblue}--help${format}  Display this message
+ ${formatblue}-l${format}   List default settings
+ ${formatblue}-n${format}   Which script number to create (create_script*[0-9])
+  [${formatorange}2${format}] ${formatgreen}${script_path} ${formatblue}-n ${formatorange}1${format}
+ ${formatblue}-nc${format}  Prevent color printing in terminal
+ ${formatblue}-o${format} or  ${formatblue}--open${format}  Open this script
+ ${formatblue}-p${format}   Permission value of output script (3 digit number)
+ ${formatblue}-r${format}   Reset option file
+  [${formatorange}3${format}] ${formatgreen}${script_path} ${formatblue}-p ${formatorange}755${format}
+ ${formatblue}-t${format}   Add text editor(s)
+  [${formatorange}4${format}] ${formatgreen}${script_path} ${formatblue}-t ${formatorange}kwrite gedit${format}
+ ${formatblue}-tr${format}  Remove text editor(s)
+  [${formatorange}5${format}] ${formatgreen}${script_path} ${formatblue}-tr ${formatorange}kwrite gedit${format}
      
 ${formatorange}DEFAULT SETTINGS${format}:
-     Text editors: ${formatgreen}${text_editors[@]}${format}
-     Script file permission: ${formatgreen}${default_permission}${format}
-     
+ Script types: ${formatgreen}`grep -c 'create_script*[0-9] ()' ${script_path}`${format}
+ Text editors: ${formatgreen}${text_editors[@]}${format}
+ Script file permission: ${formatgreen}${permission_value}${format}
+
+${formatorange}VERSION: ${formatgreen}${version_number}${format}
 ${formatred}END OF HELP: ${formatgreen}${script_path}${format}"
 exit_message 0
 }
 
-invalid_input_message () { # Displays if there are any invalid inputs
-if [ ${#bad_inputs[@]} -gt 0 ]; then
-echo "${formatred}INVALID INPUT"
-printf '%s\n' ${bad_inputs[@]}
-printf "${format}"
-fi
+list_user_settings () { # -l option
+create_option_file
+echo "${formatblue}+---USER SETTINGS---+${formatorange}"
+echo "${formatgreen}Permission value: ${formatorange}${permission_value}${format}"
+echo "${formatgreen}Text editors: ${formatorange}${text_editors[@]}${format}"
+exit_message 0
+}
+
+script_display () { # -nl option
+script_count=(`grep -o 'create_script*[0-9] ()' ${script_path} |grep -o '[0-9]*'`)
+creation_scripts=(`grep 'create_script*[0-9] ()' ${script_path} |sed 's@ @+-+@g' |awk -F '#' '{print $2}'`)
+for i_count in ${!script_count[@]}; do
+echo "${format}[${formatorange}${script_count[${i_count}]}${format}]${formatgreen}`echo ${creation_scripts[${i_count}]} |sed 's@+-+@ @g'`${format}"
+done
+exit_message 0
+}
+
+re_enter_input_message () { # Displays invalid input message
+clear
+echo "${formatred}INVALID INPUT: ${formatorange}${@}${format}"
+echo "${formatblue}PLEASE RE-ENTER INPUT${format}"
 }
 
 exit_message () { # Message before exiting script
@@ -419,9 +1479,11 @@ exit_type='0'
 else
 exit_type=${1}
 fi
-wait # Waits for background processes to finish before exiting
-echo "${formatblue}EXITING SCRIPT:${formatorange} ${script_path}${format}"
-printf "${formatReset}\n"
+# Suggest help message
+if [ ${exit_type} -ne 0 2>/dev/null ] || [ ${suggest_help} == 'yes' 2>/dev/null ]; then
+echo "${formatorange}TO DISPLAY HELP MESSAGE TYPE: ${formatgreen}${script_path} -h${format}"
+fi
+printf "${formatreset}\n"
 exit ${exit_type}
 }
 
@@ -430,19 +1492,37 @@ for inputs; do # Reads through all inputs
 option_eval ${inputs}
 done
 
-if [ ${clear_screen} != 'no' 2>/dev/null ]; then
-clear	# Clears screen unless activation of input option: -cs
+clear
+color_formats # Activates or inhibits colorful output
+
+# Exit script if invalid inputs found
+if [ ${#bad_inputs[@]} -gt 0 ]; then
+suggest_help='yes'
+re_enter_input_message ${bad_inputs[@]}
+exit_message 1
 fi
 
-color_formats # Activates or inhibits colorful output
-invalid_input_message # Display invalid inputs
+create_option_file # create .ini file
+
+if [ -z ${n_script} 2>/dev/null ]; then
+n_script=${default_script_number}
+fi
 
 # Display help message or open file
 if [ ${activate_help} == 'yes' 2>/dev/null ]; then
 script_usage
-elif [ ${open_script} == 'yes' 2>/dev/null  ]; then
+elif [ ${open_script} == 'yes' ]; then # -o or --open option
 echo "${formatorange}SCRIPT: ${formatgreen}${script_path}${format}"
-open_file ${script_path}
+open_text_editor ${script_path} ${text_editors[@]}
+exit_message 0
+elif [ ${list_settings} == 'yes' 2>/dev/null ]; then # -l option
+list_user_settings
+elif [ ${display_scripts} == 'yes' 2>/dev/null ]; then # -nl option
+script_display
+elif [ ${reset_template} == 'yes' 2>/dev/null ]; then # -r option
+open_text_editor ${option_file} ${text_editors[@]}
+reset_option_file
+exit_message 0
 elif [ -z ${filename} ]; then
 prompt_user_input
 read_filename

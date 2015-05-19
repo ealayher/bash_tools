@@ -7,5 +7,5 @@ General bash scripts
 Function that calculates the process time of a shell script (*source* path inside of shell script)  
 
 **script_title.sh**:  
-A script that creates a default script. Edit headers, functions and variables inside the **create_script** function.  
+A script that creates default scripts. Personalize code inside **create_script** functions.  
 Recommendation: Create an alias inside your *${HOME}/.bashrc* file

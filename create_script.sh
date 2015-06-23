@@ -1,7 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
 # Created: 04/22/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/2015 By: Evan Layher
+# Revised: 06/23/2015 By: Evan Layher
 # Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
@@ -79,7 +79,6 @@ exit_message 98
 fi
 }
 
-
 ### SCRIPT TYPES: Must have naming convenction of 'create_script*[0-9] () {' [ e.g. create_script10 () { # Comments ]
 create_script1 () { # Advanced script with option file
 echo "#!/bin/bash
@@ -91,7 +90,6 @@ echo "#!/bin/bash
 #
 #-------------------------------- VARIABLES --------------------------------#
 
-
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 max_bg_jobs='10' # '10': Max number of background processes
 default_text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
@@ -101,7 +99,6 @@ script_start_time=\`date +%s\` 		# Script start time (in seconds).
 script_start_date_time=\`date +%x' '%r\`	# Script start date and time: (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -209,19 +206,15 @@ fi
 create_option_file () { # Creates .ini file to store user preferences
 ealayher_code_dir=\"\${HOME}/.ealayher_code\" # Directory of preference file
 option_file=\"\${ealayher_code_dir}/\$(basename \${script_path%.*}).ini\" # .ini file path
-
 if ! [ -d \${ealayher_code_dir} ]; then # Create directory for option file
 mkdir \${ealayher_code_dir}
 fi
-
 if ! [ -f \${option_file} ]; then # Create option file
 echo \"[options]
 text_editors=(\${default_text_editors[@]})
 \" > \${option_file}
 fi
-
 text_editors=(\`awk -F '=' '/text_editors=/ {print \$2}' \${option_file} |sed -e 's@(@@g' -e 's@)@@g'\`)
-
 if [ \${#add_editors[@]} -gt 0 ] || [ \${#rem_editors[@]} -gt 0 ]; then # Change text editors
 old_editor_vals=\"text_editors=(\${text_editors[@]})\"
 	for i_rem_editor in \${rem_editors[@]} \${add_editors[@]}; do # Removes duplicate inputs
@@ -251,7 +244,6 @@ for vitals; do
 	bad_files+=(\"\${vitals}\")
 	fi
 done
-
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\\n' \${bad_files[@]}
@@ -428,7 +420,6 @@ echo "#!/bin/bash
 #
 #-------------------------------- VARIABLES --------------------------------#
 
-
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 max_bg_jobs='10' # '10': Max number of background processes
 default_text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
@@ -436,7 +427,6 @@ default_text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor co
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -541,19 +531,15 @@ fi
 create_option_file () { # Creates .ini file to store user preferences
 ealayher_code_dir=\"\${HOME}/.ealayher_code\" # Directory of preference file
 option_file=\"\${ealayher_code_dir}/\$(basename \${script_path%.*}).ini\" # .ini file path
-
 if ! [ -d \${ealayher_code_dir} ]; then # Create directory for option file
 mkdir \${ealayher_code_dir}
 fi
-
 if ! [ -f \${option_file} ]; then # Create option file
 echo \"[options]
 text_editors=(\${default_text_editors[@]})
 \" > \${option_file}
 fi
-
 text_editors=(\`awk -F '=' '/text_editors=/ {print \$2}' \${option_file} |sed -e 's@(@@g' -e 's@)@@g'\`)
-
 if [ \${#add_editors[@]} -gt 0 ] || [ \${#rem_editors[@]} -gt 0 ]; then # Change text editors
 old_editor_vals=\"text_editors=(\${text_editors[@]})\"
 	for i_rem_editor in \${rem_editors[@]} \${add_editors[@]}; do # Removes duplicate inputs
@@ -583,7 +569,6 @@ for vitals; do
 	bad_files+=(\"\${vitals}\")
 	fi
 done
-
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\\n' \${bad_files[@]}
@@ -732,7 +717,6 @@ echo "#!/bin/bash
 #
 #-------------------------------- VARIABLES --------------------------------#
 
-
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
@@ -742,7 +726,6 @@ script_start_time=\`date +%s\` 		# Script start time (in seconds).
 script_start_date_time=\`date +%x' '%r\`	# Script start date and time: (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -843,7 +826,6 @@ for vitals; do
 	bad_files+=(\"\${vitals}\")
 	fi
 done
-
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\\n' \${bad_files[@]}
@@ -974,12 +956,11 @@ exit_message 0"
 create_script4 () { # Advanced script WITHOUT option file or time display
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 06/22/15 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/15 By: Evan Layher
+# Created: ${todays_date} By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: ${todays_date} By: Evan Layher
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
-
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 max_bg_jobs='10' # '10': Max number of background processes
@@ -988,7 +969,6 @@ text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands i
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -1086,7 +1066,6 @@ for vitals; do
 	bad_files+=(\"\${vitals}\")
 	fi
 done
-
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\\n' \${bad_files[@]}
@@ -1185,12 +1164,11 @@ exit_message 0"
 create_script5 () { # Basic script with exit message
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 06/22/15 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/15 By: Evan Layher
+# Created: ${todays_date} By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: ${todays_date} By: Evan Layher
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
-
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
@@ -1198,7 +1176,6 @@ text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands i
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -1288,7 +1265,6 @@ for vitals; do
 	bad_files+=(\"\${vitals}\")
 	fi
 done
-
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\\n' \${bad_files[@]}
@@ -1372,7 +1348,6 @@ if [ \${#bad_inputs[@]} -gt 0 ]; then
 re_enter_input_message \${bad_inputs[@]}
 exit_message 1
 fi
-
 if [ \${activate_help} == 'yes' ]; then # -h or --help
 script_usage
 elif [ \${open_script} == 'yes' ]; then # -o or --open
@@ -1386,12 +1361,11 @@ exit_message 0"
 create_script6 () { # Basic script WITHOUT exit message
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 06/22/15 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/15 By: Evan Layher
+# Created: ${todays_date} By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: ${todays_date} By: Evan Layher
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
-
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
@@ -1399,7 +1373,6 @@ text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands i
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -1485,7 +1458,6 @@ for vitals; do
 	bad_files+=(\"\${vitals}\")
 	fi
 done
-
 if [ \${#bad_files[@]} -gt 0 ]; then
 echo \"\${formatred}MISSING ESSENTIAL FILE(S):\${formatblue}\"
 printf '%s\\n' \${bad_files[@]}
@@ -1573,12 +1545,11 @@ exit_message 0"
 create_script7 () { # Basic script with functions
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 06/22/15 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/15 By: Evan Layher
+# Created: ${todays_date} By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: ${todays_date} By: Evan Layher
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
-
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands in order of preference
@@ -1586,7 +1557,6 @@ text_editors=('kwrite' 'gedit' 'emacs' 'vim' 'leafpad') # text editor commands i
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_path=\"\$(readlink -f \${BASH_SOURCE[0]})\"	# Full path of this script
 version_number='1.0'
-
 activate_colors='yes'	# 'yes': Displays messages in color (color_formats) ['yes' or 'no'] [INPUT: '-nc']
 activate_help='no'	# 'no': Displays help messeage (script_usage) ['yes' or 'no'] [INPUT: '-h' or '--help']
 clear_screen='yes'	# 'yes': Clears screen before running script ['yes' or 'no'] [INPUT: '-cs']
@@ -1737,12 +1707,11 @@ exit_message 0"
 create_script8 () { # Header information only
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 06/22/15 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/15 By: Evan Layher
+# Created: ${todays_date} By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: ${todays_date} By: Evan Layher
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
-
 
 #---------------------------------- CODE -----------------------------------#"
 } # create_script8
@@ -1977,7 +1946,6 @@ ${formatorange}DEFAULT SETTINGS${format}:
  Script types: ${formatgreen}`grep -c 'create_script*[0-9] ()' ${script_path}`${format}
  Text editors: ${formatgreen}${text_editors[@]}${format}
  Script file permission: ${formatgreen}${permission_value}${format}
-
 ${formatorange}VERSION: ${formatgreen}${version_number}${format}
 ${formatred}END OF HELP: ${formatgreen}${script_path}${format}"
 exit_message 0

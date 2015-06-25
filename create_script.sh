@@ -7,7 +7,7 @@
 # Create new scripts with customized information
 
 ## --- LICENSE INFORMATION --- ##
-## script_title.sh is the proprietary property of The Regents of the University of California ("The Regents.")
+## create_script.sh is the proprietary property of The Regents of the University of California ("The Regents.")
 
 ## Copyright © 2014-15 The Regents of the University of California, Davis campus. All Rights Reserved.
 

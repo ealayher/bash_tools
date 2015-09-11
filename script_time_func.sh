@@ -1,7 +1,12 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
+<<<<<<< HEAD
 #Created: 08/31/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
 #Revised: 04/18/2015 By: Evan Layher
+=======
+# Created: 08/31/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
+# Revised: 06/22/2015 By: Evan Layher
+>>>>>>> origin/master
 #--------------------------------------------------------------------------------------#
 # Calculates the amount of time it takes to run a shell script
 # Simply source this script and input: script_time_func

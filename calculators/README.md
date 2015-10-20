@@ -1,2 +1,2 @@
 # calculators
-Basic floating number calculators in shell scripts
+Basic floating number calculators for shell scripts

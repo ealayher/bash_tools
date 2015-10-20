@@ -29,5 +29,3 @@ Open files, create new files or open blank text editor.
 
 **script_time_func.sh**:  
 Function that calculates the process time of a shell script.
-
->>>>>>> origin/master

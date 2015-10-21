@@ -1,12 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
-<<<<<<< HEAD
-#Created: 08/31/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-#Revised: 04/18/2015 By: Evan Layher
-=======
-# Created: 08/31/2014 By: Evan Layher (ealayher@ucdavis.edu: UC Davis Medical Center)
-# Revised: 06/22/2015 By: Evan Layher
->>>>>>> origin/master
+# Created: 08/31/2014 By: Evan Layher (evan.layher@psych.ucsb.edu)
+# Revised: 10/21/2015 By: Evan Layher
 #--------------------------------------------------------------------------------------#
 # Calculates the amount of time it takes to run a shell script
 # Simply source this script and input: script_time_func
@@ -50,40 +45,44 @@
 ## --------------------------- ##
 
 #------------------------- GENERAL SCRIPT VARIABLES ------------------------#
-script_start_time=`date +%s` 			# Script start time (in seconds).
-script_start_date_time=`date +%x' '%r` 		# Script start date and time: (e.g. 01/01/2015 12:00:00 AM)
-script_path="$(readlink -f ${BASH_SOURCE[0]})" 	# Full path of this script
+script_start_time=`date +%s`           # Time in seconds.
+script_start_date_time=`date +%x' '%r` # (e.g. 01/01/2015 12:00:00 AM)
+script_path="${BASH_SOURCE[0]}"        # Script path
 #------------------------- CALCULATES PROCESS TIME: ------------------------#
-script_time_message () { # Displays message
-echo "STARTED : ${script_start_date_time}"
-echo "FINISHED: `date +%x' '%r`"
-}
+script_time_message () { # Script process time message
+	echo "STARTED : ${script_start_date_time}"
+	echo "FINISHED: `date +%x' '%r`"
+} # script_time_message
 
-script_time_func () { # Calculates process time
-script_end_time=`date +%s`
-script_process_time=$((${script_end_time} - ${script_start_time}))
-if [ ${script_process_time} -lt 60 ]; then
-script_time_message 
-echo "PROCESS TIME: ${script_process_time} second(s)."
-elif [ ${script_process_time} -lt 3600 ]; then
-script_time_message 
-echo "PROCESS TIME: $((${script_process_time} / 60)) minute(s) and $((${script_process_time} % 60)) second(s)."
-elif [ ${script_process_time} -lt 86400 ]; then
-script_time_message 
-echo "PROCESS TIME: $((${script_process_time} / 3600)) hour(s) $((${script_process_time} % 3600 / 60)) minute(s) and $((${script_process_time} % 60)) second(s)."
-elif [ ${script_process_time} -ge 86400 ]; then
-script_time_message 
-echo "PROCESS TIME: $((${script_process_time} / 86400)) day(s) $((${script_process_time} % 86400 / 3600)) hour(s) $((${script_process_time} % 3600 / 60)) minute(s) and $((${script_process_time} % 60)) second(s)."
-else
-echo "Not a valid time measurment for 'script_time_func.sh'"
-fi
-}
+script_time_func () { # Script process time calculation
+	script_end_time=`date +%s`
+	script_process_time=$((${script_end_time} - ${script_start_time}))
+	days=$((${script_process_time} / 86400))
+	hours=$((${script_process_time} % 86400 / 3600))
+	mins=$((${script_process_time} % 3600 / 60))
+	secs=$((${script_process_time} % 60))
+	time_message=("PROCESS TIME: ")
+	
+	if [ "${days}" -gt '0' ]; then 
+		time_message+=("${days} day(s) ${hours} hour(s) ${mins} minute(s) ${secs} second(s)")
+	elif [ "${hours}" -gt '0' ]; then
+		time_message+=("${hours} hour(s) ${mins} minute(s) ${secs} second(s)")
+	elif [ "${mins}" -gt '0' ]; then
+		time_message+=("${mins} minute(s) ${secs} second(s)")
+	else
+		time_message+=("${secs} second(s)")
+	fi
+	
+	script_time_message
+	echo ${time_message[@]}
+} # script_time_func
 
 #---------------------------------- CODE -----------------------------------#
 ealayher_code_dir="${HOME}/.ealayher_code"
 
 # Creates master copy of script
 if ! [ -d ${ealayher_code_dir} ]; then
-mkdir ${ealayher_code_dir}
+	mkdir "${ealayher_code_dir}"
 fi
-cp ${script_path} ${ealayher_code_dir}
+
+cp "${script_path}" "${ealayher_code_dir}"

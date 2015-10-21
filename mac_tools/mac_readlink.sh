@@ -1,7 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
 # Created: 10/19/2015 By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: 10/19/2015 By: Evan Layher
+# Revised: 10/21/2015 By: Evan Layher
 # Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 # Output absolute path of directory or file (equivalent to linux 'readlink -f' function)
@@ -14,6 +14,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e "${input_path}" ]; then # if file or directory exists
 		cd "$(dirname ${input_path})"
 		abs_path="$(pwd)/$(basename ${input_path})"
+		cd "${cwd}" # Change directory back to original directory
 	fi
 
 	if [ -e "${abs_path}" ] && ! [ -z "${abs_path}" ]; then
@@ -21,6 +22,4 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo "${input_path}" # echo original input
 	fi
-	
-	cd "${cwd}" # Change directory back to original directory
 } # mac_readlink

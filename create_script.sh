@@ -257,13 +257,13 @@ script_time_func () { # Script process time calculation
 	time_message=(\"PROCESS TIME: \")
 	
 	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${hours}\" -gt '0' ];then
-		time_message+=(\"\${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${days}\" -gt '0' ];then
-		time_message+=(\"\${mins} minutes \${secs} seconds\")
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
 	else
-		time_message+=(\"\${secs} seconds\")
+		time_message+=(\"\${secs} second(s)\")
 	fi
 	
 	script_time_message
@@ -529,13 +529,13 @@ script_time_func () { # Script process time calculation
 	time_message=(\"PROCESS TIME: \")
 	
 	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${hours}\" -gt '0' ];then
-		time_message+=(\"\${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${days}\" -gt '0' ];then
-		time_message+=(\"\${mins} minutes \${secs} seconds\")
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
 	else
-		time_message+=(\"\${secs} seconds\")
+		time_message+=(\"\${secs} second(s)\")
 	fi
 	
 	script_time_message
@@ -786,13 +786,13 @@ script_time_func () { # Script process time calculation
 	time_message=(\"PROCESS TIME: \")
 	
 	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${hours}\" -gt '0' ];then
-		time_message+=(\"\${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${days}\" -gt '0' ];then
-		time_message+=(\"\${mins} minutes \${secs} seconds\")
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
 	else
-		time_message+=(\"\${secs} seconds\")
+		time_message+=(\"\${secs} second(s)\")
 	fi
 	
 	script_time_message
@@ -1034,13 +1034,13 @@ script_time_func () { # Script process time calculation
 	time_message=(\"PROCESS TIME: \")
 	
 	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${hours}\" -gt '0' ];then
-		time_message+=(\"\${hours} hour(s) \${mins} minutes \${secs} seconds\")
-	elif [ \"\${days}\" -gt '0' ];then
-		time_message+=(\"\${mins} minutes \${secs} seconds\")
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
 	else
-		time_message+=(\"\${secs} seconds\")
+		time_message+=(\"\${secs} second(s)\")
 	fi
 	
 	script_time_message

@@ -38,32 +38,34 @@
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # default text editor commands in order of preference
-permission_value='755' # '755': Default file permission for new scripts
-default_script_number='1'
+permission_value='755'      # '755': Default file permission for new scripts
+default_script_number='1'   # '1'  : 'create_script' functions
+script_author='Evan Layher' # Author of script
+contact_info='evan.layher@psych.ucsb.edu' # Author contact information
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-todays_date=`date +%x` 			# Inputs date inside of script
-script_path="${BASH_SOURCE[0]}"	# Script path (becomes absolute path later)
-version_number='3.0' 			# Script version number
+todays_date=`date +%x`          # Inputs date inside of script
+script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
+version_number='3.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	    # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-change_permission='no'	# 'no' : Change permission         [INPUT: '[0-7][0-7][0-7]']
-display_scripts='no'	# 'no' : Display script types      [INPUT: '-nl']
-filename_reader='on'	# 'on' : Read in filename ('on' or 'off')
-list_settings='no'	    # 'no' : List user settings        [INPUT: '-l']
-open_file='yes'			# 'yes': Open newly created script [INPUT: '-i']
-open_script='no'		# 'no' : Open this script 		   [INPUT: '-o' or '--open']
-p_in='no'				# 'no' : Read in permission level for output file
+activate_help='no'      # 'no' : Display help message      [INPUT: '-h' or '--help']
+change_permission='no'  # 'no' : Change permission         [INPUT: '[0-7][0-7][0-7]']
+display_scripts='no'    # 'no' : Display script types      [INPUT: '-nl']
+filename_reader='on'    # 'on' : Read in filename ('on' or 'off')
+list_settings='no'      # 'no' : List user settings        [INPUT: '-l']
+open_file='yes'         # 'yes': Open newly created script [INPUT: '-i']
+open_script='no'        # 'no' : Open this script          [INPUT: '-o' or '--open']
+p_in='no'               # 'no' : Read in permission level for output file
 
 #-------------------------------- FUNCTIONS --------------------------------#
 ### SCRIPT TYPES: Must have naming convenction of 'create_script*[0-9] () {' [ e.g. create_script10 () { # Comments ]
 create_script1 () { # Includes time, exit message, bg functions, vital_command and vital_file
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -73,19 +75,19 @@ max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\` 		   # Time in seconds.
+script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-show_time='yes'		  # 'yes': Display process time      [INPUT: '-nt']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 control_bg_jobs () { # Controls number of background processes
@@ -112,17 +114,17 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-nt' ]; then
-		show_time='no'		 # Do NOT display script process time
+		show_time='no'       # Do NOT display script process time
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -130,13 +132,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -147,6 +149,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -154,8 +157,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -319,15 +320,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -344,8 +345,8 @@ exit_message 0"
 create_script2 () { # Includes time, exit message, vital_command and vital_file
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -354,19 +355,19 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\` 		   # Time in seconds.
+script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-show_time='yes'		  # 'yes': Display process time      [INPUT: '-nt']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
@@ -385,17 +386,17 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-nt' ]; then
-		show_time='no'		 # Do NOT display script process time
+		show_time='no'       # Do NOT display script process time
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -403,13 +404,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -420,6 +421,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -427,8 +429,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -592,15 +592,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -617,8 +617,8 @@ exit_message 0"
 create_script3 () { # Includes time, exit message and bg functions
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -628,19 +628,19 @@ max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\` 		   # Time in seconds.
+script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-show_time='yes'		  # 'yes': Display process time      [INPUT: '-nt']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 control_bg_jobs () { # Controls number of background processes
@@ -667,17 +667,17 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-nt' ]; then
-		show_time='no'		 # Do NOT display script process time
+		show_time='no'       # Do NOT display script process time
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -685,13 +685,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -702,6 +702,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -709,8 +710,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -850,15 +849,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -875,8 +874,8 @@ exit_message 0"
 create_script4 () { # Includes time and exit message
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -885,19 +884,19 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\` 		   # Time in seconds.
+script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-show_time='yes'		  # 'yes': Display process time      [INPUT: '-nt']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
@@ -916,17 +915,17 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-nt' ]; then
-		show_time='no'		 # Do NOT display script process time
+		show_time='no'       # Do NOT display script process time
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -934,13 +933,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -951,6 +950,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -958,8 +958,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -1099,15 +1097,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -1124,8 +1122,8 @@ exit_message 0"
 create_script5 () { # Includes exit message, bg functions, vital_command and vital_file
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -1136,16 +1134,16 @@ text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' '
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 control_bg_jobs () { # Controls number of background processes
@@ -1172,15 +1170,15 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -1188,13 +1186,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1205,6 +1203,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -1212,8 +1211,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -1341,15 +1338,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1366,8 +1363,8 @@ exit_message 0"
 create_script6 () { # Includes exit message, vital_command and vital_file
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -1377,16 +1374,16 @@ text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' '
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
@@ -1405,15 +1402,15 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -1421,13 +1418,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1438,6 +1435,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -1445,8 +1443,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -1574,15 +1570,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1599,8 +1595,8 @@ exit_message 0"
 create_script7 () { # Includes exit message and bg functions
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -1611,16 +1607,16 @@ text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' '
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 control_bg_jobs () { # Controls number of background processes
@@ -1647,15 +1643,15 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -1663,13 +1659,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1680,6 +1676,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -1687,8 +1684,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -1792,15 +1787,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1817,8 +1812,8 @@ exit_message 0"
 create_script8 () { # Includes exit message
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -1828,16 +1823,16 @@ text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' '
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-display_exit='yes'	  # 'yes': Display an exit message   [INPUT: '-nm']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
@@ -1856,15 +1851,15 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-nm' ]; then
-		display_exit='no'	 # Do NOT display exit message
+		display_exit='no'    # Do NOT display exit message
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -1872,13 +1867,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1889,6 +1884,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -1896,8 +1892,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -2001,15 +1995,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -2026,8 +2020,8 @@ exit_message 0"
 create_script9 () { # Basic functions
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -2037,15 +2031,15 @@ text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' '
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"		   # Script path (becomes absolute path later)
-version_number='1.0'  # Script version number
+script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
+version_number='1.0' # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
-activate_help='no'	  # 'no' : Display help messeage     [INPUT: '-h' or '--help']
-clear_screen='yes'	  # 'yes': Clear screen at start     [INPUT: '-cs']
-open_script='no'	  # 'no' : Open this script          [INPUT: '-o' or '--open']
-suggest_help='no'	  # 'no' : Suggest help (within script option: '-nh')
+activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
+clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
+open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
+suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
@@ -2063,13 +2057,13 @@ option_eval () { # Evaluate inputs
 
 activate_options () { # Activate input options
 	if [ \"\${1}\" == '-cs' ]; then
-		clear_screen='no'	 # Do NOT clear screen at start
+		clear_screen='no'    # Do NOT clear screen at start
 	elif [ \"\${1}\" == '-h' ] || [ \"\${1}\" == '--help' ]; then
-		activate_help='yes'	 # Display help message
+		activate_help='yes'  # Display help message
 	elif [ \"\${1}\" == '-nc' ]; then
 		activate_colors='no' # Do NOT display messages in color
 	elif [ \"\${1}\" == '-o' ] || [ \"\${1}\" == '--open' ]; then
-		open_script='yes'	 # Open this script
+		open_script='yes'    # Open this script
 	else # if option is not defined here (for debugging)
 		bad_inputs+=(\"ERROR:activate_options:\${1}\")
 	fi
@@ -2077,13 +2071,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\`  # Black background, white text
-		red=\`tput setab 0; tput setaf 1\`  # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\`  # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\`  # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\`  # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\`  # Black background, purple text
-		formatreset=\`tput sgr0\`			  # Reset to default terminal settings
+		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
+		red=\`tput setab 0; tput setaf 1\` # Black background, red text
+		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
+		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
+		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
+		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
+		formatreset=\`tput sgr0\`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -2094,6 +2088,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e \"\${input_path}\" ]; then # if file or directory exists
 		cd \"\$(dirname \${input_path})\"
 		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
+		cd \"\${cwd}\" # Change directory back to original directory
 	fi
 
 	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
@@ -2101,8 +2096,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo \"\${input_path}\" # echo original input
 	fi
-	
-	cd \"\${cwd}\" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -2175,8 +2168,6 @@ exit_message () { # Message before exiting script
 			suggest_help='no'
 		fi
 	done
-	
-	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -2195,15 +2186,15 @@ for inputs; do # Reads through all inputs
 done
 
 if ! [ \"\${clear_screen}\" == 'no' 2>/dev/null ]; then
-	clear	# Clears screen unless activation of input option: -cs
+	clear     # Clears screen unless activation of input option: '-cs'
 fi
 
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # -h or --help
+if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then # -o or --open
+elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0
 fi
@@ -2220,8 +2211,8 @@ exit_message 0"
 create_script10 () { # Header information only
 echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: ${todays_date} By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: ${todays_date} By: Evan Layher
+# Created: ${todays_date} By: ${script_author} (${contact_info})
+# Revised: ${todays_date} By: ${script_author}
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
@@ -2238,7 +2229,7 @@ option_eval () { # Evaluates command line options
 	[ ${1} == '-nl' 2>/dev/null ] || [ ${1} == '-o' 2>/dev/null ] || \
 	[ ${1} == '--open' 2>/dev/null ] || [ ${1} == '-p' 2>/dev/null ]; then
 		activate_options "${1}"
-	elif ! [ -z "${n_in}" 2>/dev/null ] && [ "${n_in}" == 'yes' 2>/dev/null ]; then # Add text editors
+	elif ! [ -z "${n_in}" 2>/dev/null ] && [ "${n_in}" == 'yes' 2>/dev/null ]; then
 		if [ "${1}" -eq "${1}" 2>/dev/null ] && [ "${1}" -gt '0' 2>/dev/null ] \
 		&& [ -z "${n_script}" 2>/dev/null ]; then
 			n_script="${1}"
@@ -2269,21 +2260,21 @@ activate_options () { # Activate input options
 	p_in='no'  # Do NOT read in new 'p' default
 	
 	if [ "${1}" == '-h' ] || [ "${1}" == '--help' ]; then
-		activate_help='yes'	  # Display help message
+		activate_help='yes'   # Display help message
 	elif [ "${1}" == '-i' ]; then
-		open_file='no'		  # List user settings
+		open_file='no'        # List user settings
 	elif [ "${1}" == '-l' ]; then
-		list_settings='yes'	  # List user settings
+		list_settings='yes'   # List user settings
 	elif [ "${1}" == '-n' ]; then
-		n_in='yes'			  # Which script number to create
+		n_in='yes'            # Which script number to create
 	elif [ "${1}" == '-nc' ]; then
 		activate_colors='no'  # Do not display in color
 	elif [ "${1}" == '-nl' ]; then
 		display_scripts='yes' # List script explanations
 	elif [ "${1}" == '-o' ] || [ "${1}" == '--open' ]; then
-		open_script='yes'	  # Open this script
+		open_script='yes'     # Open this script
 	elif [ "${1}" == '-p' ]; then
-		p_in='yes'		      # Input permission value
+		p_in='yes'            # Input permission value
 	else # if option is not defined here (for debugging)
 		bad_inputs+=("ERROR:activate_options:${1}")
 	fi
@@ -2291,13 +2282,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ "${activate_colors}" == 'yes' 2>/dev/null ]; then
-		whi=`tput setab 0; tput setaf 7`  # Black background, white text
-		red=`tput setab 0; tput setaf 1`  # Black background, red text
-		ora=`tput setab 0; tput setaf 3`  # Black background, orange text
-		gre=`tput setab 0; tput setaf 2`  # Black background, green text
-		blu=`tput setab 0; tput setaf 4`  # Black background, blue text
-		pur=`tput setab 0; tput setaf 5`  # Black background, purple text
-		formatreset=`tput sgr0`			  # Reset to default terminal settings
+		whi=`tput setab 0; tput setaf 7` # Black background, white text
+		red=`tput setab 0; tput setaf 1` # Black background, red text
+		ora=`tput setab 0; tput setaf 3` # Black background, orange text
+		gre=`tput setab 0; tput setaf 2` # Black background, green text
+		blu=`tput setab 0; tput setaf 4` # Black background, blue text
+		pur=`tput setab 0; tput setaf 5` # Black background, purple text
+		formatreset=`tput sgr0`          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -2318,6 +2309,7 @@ mac_readlink () { # Get absolute path of a file
 	if [ -e "${input_path}" ]; then # if file or directory exists
 		cd "$(dirname ${input_path})"
 		abs_path="$(pwd)/$(basename ${input_path})"
+		cd "${cwd}" # Change directory back to original directory
 	fi
 
 	if [ -e "${abs_path}" ] && ! [ -z "${abs_path}" ]; then
@@ -2325,8 +2317,6 @@ mac_readlink () { # Get absolute path of a file
 	else # Invalid input or script error
 		echo "${input_path}" # echo original input
 	fi
-	
-	cd "${cwd}" # Change directory back to original directory
 } # mac_readlink
 
 open_text_editor () { # Opens input file
@@ -2429,14 +2419,14 @@ echo "${red}COULD NOT CREATE: ${ora}${1}${whi}"
 exit_message 98
 } # error_script_create
 
-list_user_settings () { # -l option
+list_user_settings () { # '-l' option
 	echo "${pur}+---USER SETTINGS---+${ora}"
 	echo "${gre}Permission value: ${ora}${permission_value}${whi}"
 	echo "${gre}Text editors: ${ora}${text_editors[@]}${whi}"
 	exit_message 0
 } # list_user_settings
 
-script_display () { # -nl option
+script_display () { # '-nl' option
 	script_count=(`grep '^create_script[0-9]' "${script_path}" |grep '() {' |awk '{print $1}' |sed 's@create_script@@g'`)
 	creation_scripts=(`grep '^create_script[0-9]' "${script_path}" |grep '() {' |sed 's@ @+-+@g' |awk -F '#' '{print $2}'`)
 	
@@ -2481,9 +2471,9 @@ clear
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ "${activate_help}" == 'yes' ]; then # -h or --help
+if [ "${activate_help}" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ ${open_script} == 'yes' ]; then   # -o or --open
+elif [ ${open_script} == 'yes' ]; then   # '-o' or '--open'
 	open_text_editor "${script_path}" ${text_editors[@]}
 	exit_message 0
 fi
@@ -2498,9 +2488,9 @@ if [ -z "${n_script}" 2>/dev/null ]; then
 	n_script="${default_script_number}" # Create default template
 fi
 
-if [ "${list_settings}" == 'yes' 2>/dev/null ]; then # -l option
+if [ "${list_settings}" == 'yes' 2>/dev/null ]; then     # '-l'
 	list_user_settings
-elif [ "${display_scripts}" == 'yes' 2>/dev/null ]; then # -nl option
+elif [ "${display_scripts}" == 'yes' 2>/dev/null ]; then # '-nl'
 	script_display
 else # Check existence of 'create_script' function
 	script_function="create_script${n_script}"

@@ -2,7 +2,7 @@
 #--------------------------------------------------------------------------------------#
 # Created: 09/12/2014 By: Evan Layher (evan.layher@psych.ucsb.edu)
 # Revised: 06/02/2015 By: Evan Layher
-# Revised: 11/01/2015 By: Evan Layher (2.0) Mac compatible and excepts files with spaces
+# Revised: 11/01/2015 By: Evan Layher (2.0) Mac compatible and accepts files with spaces
 #--------------------------------------------------------------------------------------#
 # Save backup copies of scripts and easily retrieve them when needed
 #-------------------------------- VARIABLES --------------------------------#

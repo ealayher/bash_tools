@@ -2,24 +2,24 @@
 #--------------------------------------------------------------------------------------#
 # Created: 10/19/2015 By: Evan Layher (evan.layher@psych.ucsb.edu)
 # Revised: 10/21/2015 By: Evan Layher
+# Revised: 11/01/2015 By: Evan Layher # Excepts non-file inputs
 # Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
-# Output absolute path of directory or file (equivalent to linux 'readlink -f' function)
-# If input is not a valid file path then simply outputs the input
+# Output absolute path of directory or file (whether or not file exists)
+# Equivalent to linux 'readlink -f' function except also deals with non-files
+# If input is not valid, then output is just the input
+# EXAMPLE USAGE: x=$(mac_readlink '../test_dir/test_file.sh')
 
 mac_readlink () { # Get absolute path of a file
-	input_path="${1}"
-	cwd="$(pwd)" # Current working directory path
+	dir_mac=$(dirname "${1}")   # Directory path
+	file_mac=$(basename "${1}") # Filename
+	wd_mac="$(pwd)" # Working directory path
 
-	if [ -e "${input_path}" ]; then # if file or directory exists
-		cd "$(dirname ${input_path})"
-		abs_path="$(pwd)/$(basename ${input_path})"
-		cd "${cwd}" # Change directory back to original directory
-	fi
-
-	if [ -e "${abs_path}" ] && ! [ -z "${abs_path}" ]; then
-		echo "${abs_path}"
-	else # Invalid input or script error
-		echo "${input_path}" # echo original input
+	if [ -d "${dir_mac}" ]; then
+		cd "${dir_mac}"
+		echo "$(pwd)/${file_mac}" # Print full path
+		cd "${wd_mac}" # Change directory back to original directory
+	else
+		echo "${1}" # Print input
 	fi
 } # mac_readlink

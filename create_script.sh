@@ -2,7 +2,8 @@
 #--------------------------------------------------------------------------------------#
 # Created: 04/22/2014 By: Evan Layher (evan.layher@psych.ucsb.edu)
 # Revised: 06/23/2015 By: Evan Layher
-# Revised: 10/21/2015 By: Evan Layher # Mac compatible (and other minor alterations)
+# Revised: 10/21/2015 By: Evan Layher # (3.0) Mac compatible (and other minor alterations)
+# Revised: 11/06/2015 By: Evan Layher # (3.1) Update create_scriptX functions
 # Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
@@ -43,11 +44,43 @@ default_script_number='1'   # '1'  : 'create_script' functions
 script_author='Evan Layher' # Author of script
 contact_info='evan.layher@psych.ucsb.edu' # Author contact information
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo "${red}HELP MESSAGE: ${gre}${script_path}${whi}
+${ora}DESCRIPTION${whi}: Create script in working directory
+     
+${ora}ADVICE${whi}: Create an alias inside your ${ora}${HOME}/.bashrc${whi} file
+(e.g. ${gre}alias cs='${script_path}'${whi})
+     
+${ora}USAGE${whi}: Input filename of new script
+  [${ora}1${whi}] ${gre}cs${ora} examplefile1.sh${whi}
+  
+${ora}OPTIONS${whi}: Can input multiple options in any order
+ ${pur}-h${whi} or ${pur}--help${whi}  Display this message
+ ${pur}-i${whi}   Do ${red}NOT${whi} open script file after it is created
+ ${pur}-l${whi}   List default settings
+ ${pur}-n${whi}   Which '${gre}create_script${whi}' function to use (${ora}default: ${gre}${default_script_number}${whi})
+  [${ora}2${whi}] ${gre}cs ${pur}-n ${ora}5${whi}
+ ${pur}-nc${whi}  Prevent color printing in terminal
+ ${pur}-nl${whi}  List comments for each '${gre}create_script${whi}' function
+ ${pur}-o${whi} or  ${pur}--open${whi}  Open this script
+ ${pur}-p${whi}   Input permission value (${ora}default: ${gre}${permission_value}${whi})
+  [${ora}3${whi}] ${gre}cs ${pur}-p ${ora}744${whi}
+     
+${ora}DEFAULT SETTINGS${whi}:
+ Script types: ${gre}`grep -c '^create_script[0-9]' ${script_path}`${whi}
+ Text editors: ${gre}${text_editors[@]}${whi}
+ Script file permission: ${gre}${permission_value}${whi}
+${ora}VERSION: ${gre}${version_number}${whi}
+${red}END OF HELP: ${gre}${script_path}${whi}"
+
+exit_message 0
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 todays_date=`date +%x`          # Inputs date inside of script
 script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
-version_number='3.0'            # Script version number
-
+version_number='3.1'            # Script version number
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'      # 'no' : Display help message      [INPUT: '-h' or '--help']
@@ -74,6 +107,33 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-nt\${whi}  Prevent script process time from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nt -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
@@ -90,14 +150,6 @@ show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
-control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
-		control_bg_jobs
-	fi
-} # control_bg_jobs
-
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
 	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
@@ -107,8 +159,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -142,20 +193,25 @@ color_formats () { # Print colorful terminal text
 	fi
 } # color_formats
 
-mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
-
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
+control_bg_jobs () { # Controls number of background processes
+	job_count=\`jobs -p |wc -l\` # Get number of running jobs
+	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
+		sleep 0.25
+		control_bg_jobs
 	fi
+} # control_bg_jobs
 
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+mac_readlink () { # Get absolute path of a file
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
+
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -209,67 +265,6 @@ vital_file () { # exits script if an essential file is missing
 } # vital_file
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-nt\${whi}  Prevent script process time from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nt -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
-script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
-	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
-	fi
-	
-	script_time_message
-	echo \${time_message[@]}
-} # script_time_func
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -312,8 +307,43 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
+script_time_message () { # Script process time message
+	echo \"STARTED : \${script_start_date_time}\"
+	echo \"FINISHED: \`date +%x' '%r\`\"
+} # script_time_message
+
+script_time_func () { # Script process time calculation
+	script_end_time=\`date +%s\`
+	script_process_time=\$((\${script_end_time} - \${script_start_time}))
+	days=\$((\${script_process_time} / 86400))
+	hours=\$((\${script_process_time} % 86400 / 3600))
+	mins=\$((\${script_process_time} % 3600 / 60))
+	secs=\$((\${script_process_time} % 60))
+	time_message=(\"PROCESS TIME: \")
+	
+	if [ \"\${days}\" -gt '0' ]; then 
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
+	else
+		time_message+=(\"\${secs} second(s)\")
+	fi
+	
+	script_time_message
+	echo \${time_message[@]}
+} # script_time_func
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -328,7 +358,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -354,6 +384,33 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-nt\${whi}  Prevent script process time from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nt -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
@@ -379,8 +436,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -415,19 +471,16 @@ color_formats () { # Print colorful terminal text
 } # color_formats
 
 mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
 
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
-	fi
-
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -481,67 +534,6 @@ vital_file () { # exits script if an essential file is missing
 } # vital_file
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-nt\${whi}  Prevent script process time from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nt -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
-script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
-	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
-	fi
-	
-	script_time_message
-	echo \${time_message[@]}
-} # script_time_func
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -584,8 +576,43 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
+script_time_message () { # Script process time message
+	echo \"STARTED : \${script_start_date_time}\"
+	echo \"FINISHED: \`date +%x' '%r\`\"
+} # script_time_message
+
+script_time_func () { # Script process time calculation
+	script_end_time=\`date +%s\`
+	script_process_time=\$((\${script_end_time} - \${script_start_time}))
+	days=\$((\${script_process_time} / 86400))
+	hours=\$((\${script_process_time} % 86400 / 3600))
+	mins=\$((\${script_process_time} % 3600 / 60))
+	secs=\$((\${script_process_time} % 60))
+	time_message=(\"PROCESS TIME: \")
+	
+	if [ \"\${days}\" -gt '0' ]; then 
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
+	else
+		time_message+=(\"\${secs} second(s)\")
+	fi
+	
+	script_time_message
+	echo \${time_message[@]}
+} # script_time_func
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -600,7 +627,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -627,6 +654,33 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-nt\${whi}  Prevent script process time from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nt -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
@@ -643,14 +697,6 @@ show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
-control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
-		control_bg_jobs
-	fi
-} # control_bg_jobs
-
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
 	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
@@ -660,8 +706,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -695,20 +740,25 @@ color_formats () { # Print colorful terminal text
 	fi
 } # color_formats
 
-mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
-
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
+control_bg_jobs () { # Controls number of background processes
+	job_count=\`jobs -p |wc -l\` # Get number of running jobs
+	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
+		sleep 0.25
+		control_bg_jobs
 	fi
+} # control_bg_jobs
 
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+mac_readlink () { # Get absolute path of a file
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
+
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -738,67 +788,6 @@ open_text_editor () { # Opens input file
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-nt\${whi}  Prevent script process time from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nt -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
-script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
-	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
-	fi
-	
-	script_time_message
-	echo \${time_message[@]}
-} # script_time_func
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -841,8 +830,43 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
+script_time_message () { # Script process time message
+	echo \"STARTED : \${script_start_date_time}\"
+	echo \"FINISHED: \`date +%x' '%r\`\"
+} # script_time_message
+
+script_time_func () { # Script process time calculation
+	script_end_time=\`date +%s\`
+	script_process_time=\$((\${script_end_time} - \${script_start_time}))
+	days=\$((\${script_process_time} / 86400))
+	hours=\$((\${script_process_time} % 86400 / 3600))
+	mins=\$((\${script_process_time} % 3600 / 60))
+	secs=\$((\${script_process_time} % 60))
+	time_message=(\"PROCESS TIME: \")
+	
+	if [ \"\${days}\" -gt '0' ]; then 
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
+	else
+		time_message+=(\"\${secs} second(s)\")
+	fi
+	
+	script_time_message
+	echo \${time_message[@]}
+} # script_time_func
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -857,7 +881,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -883,6 +907,33 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-nt\${whi}  Prevent script process time from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nt -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_time=\`date +%s\`           # Time in seconds.
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
@@ -908,8 +959,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -944,19 +994,16 @@ color_formats () { # Print colorful terminal text
 } # color_formats
 
 mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
 
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
-	fi
-
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -986,67 +1033,6 @@ open_text_editor () { # Opens input file
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-nt\${whi}  Prevent script process time from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nt -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
-script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
-	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
-	fi
-	
-	script_time_message
-	echo \${time_message[@]}
-} # script_time_func
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1089,8 +1075,43 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
+script_time_message () { # Script process time message
+	echo \"STARTED : \${script_start_date_time}\"
+	echo \"FINISHED: \`date +%x' '%r\`\"
+} # script_time_message
+
+script_time_func () { # Script process time calculation
+	script_end_time=\`date +%s\`
+	script_process_time=\$((\${script_end_time} - \${script_start_time}))
+	days=\$((\${script_process_time} / 86400))
+	hours=\$((\${script_process_time} % 86400 / 3600))
+	mins=\$((\${script_process_time} % 3600 / 60))
+	secs=\$((\${script_process_time} % 60))
+	time_message=(\"PROCESS TIME: \")
+	
+	if [ \"\${days}\" -gt '0' ]; then 
+		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${hours}\" -gt '0' ]; then
+		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
+	elif [ \"\${mins}\" -gt '0' ]; then
+		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
+	else
+		time_message+=(\"\${secs} second(s)\")
+	fi
+	
+	script_time_message
+	echo \${time_message[@]}
+} # script_time_func
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -1105,7 +1126,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -1132,6 +1153,32 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
@@ -1146,14 +1193,6 @@ open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
-control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
-		control_bg_jobs
-	fi
-} # control_bg_jobs
-
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
 	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
@@ -1163,8 +1202,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -1196,20 +1234,25 @@ color_formats () { # Print colorful terminal text
 	fi
 } # color_formats
 
-mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
-
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
+control_bg_jobs () { # Controls number of background processes
+	job_count=\`jobs -p |wc -l\` # Get number of running jobs
+	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
+		sleep 0.25
+		control_bg_jobs
 	fi
+} # control_bg_jobs
 
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+mac_readlink () { # Get absolute path of a file
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
+
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -1263,38 +1306,6 @@ vital_file () { # exits script if an essential file is missing
 } # vital_file
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1330,8 +1341,15 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -1346,7 +1364,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1372,6 +1390,32 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
@@ -1395,8 +1439,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -1429,19 +1472,16 @@ color_formats () { # Print colorful terminal text
 } # color_formats
 
 mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
 
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
-	fi
-
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -1495,38 +1535,6 @@ vital_file () { # exits script if an essential file is missing
 } # vital_file
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1562,8 +1570,15 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -1578,7 +1593,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1605,6 +1620,32 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation: '-h' or '--help' option
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
@@ -1619,14 +1660,6 @@ open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
 #-------------------------------- FUNCTIONS --------------------------------#
-control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
-		control_bg_jobs
-	fi
-} # control_bg_jobs
-
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
 	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
@@ -1636,8 +1669,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -1669,20 +1701,25 @@ color_formats () { # Print colorful terminal text
 	fi
 } # color_formats
 
-mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
-
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
+control_bg_jobs () { # Controls number of background processes
+	job_count=\`jobs -p |wc -l\` # Get number of running jobs
+	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
+		sleep 0.25
+		control_bg_jobs
 	fi
+} # control_bg_jobs
 
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+mac_readlink () { # Get absolute path of a file
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
+
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -1712,38 +1749,6 @@ open_text_editor () { # Opens input file
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1779,8 +1784,15 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -1795,7 +1807,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1821,6 +1833,32 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-nm\${whi}  Prevent exit message from displaying
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0 -nm
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
@@ -1844,8 +1882,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -1878,19 +1915,16 @@ color_formats () { # Print colorful terminal text
 } # color_formats
 
 mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
 
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
-	fi
-
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -1920,38 +1954,6 @@ open_text_editor () { # Opens input file
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
-(e.g. \${gre}alias xx='\${script_path}'\${whi})
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-nm\${whi}  Prevent exit message from displaying
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0 -nm
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1987,8 +1989,15 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -2003,7 +2012,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -2029,6 +2038,28 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+#------------------------- SCRIPT HELP MESSAGE -----------------------------#
+script_usage () { # Script explanation
+	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
+\${ora}DESCRIPTION\${whi}:
+     
+\${ora}USAGE\${whi}:
+ [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
+     
+\${ora}OPTIONS\${whi}: Can input multiple options in any order
+ \${pur}-cs\${whi}  Prevent screen from clearing before script processes
+ \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
+ \${pur}-nc\${whi}  Prevent color printing in terminal
+ \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
+     
+\${ora}DEFAULT SETTINGS\${whi}:
+ text editors: \${gre}\${text_editors[@]}\${whi}
+     
+\${ora}VERSION: \${gre}\${version_number}\${whi}
+\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
+	exit_message 0
+} # script_usage
+
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
@@ -2050,8 +2081,7 @@ option_eval () { # Evaluate inputs
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
 	else
-		echo \"\${1}\"
-		bad_inputs+=(\"\${1}\")
+		true
 	fi
 } # option_eval
 
@@ -2082,19 +2112,16 @@ color_formats () { # Print colorful terminal text
 } # color_formats
 
 mac_readlink () { # Get absolute path of a file
-	input_path=\"\${1}\"
-	cwd=\"\$(pwd)\" # Current working directory path
+	dir_mac=\$(dirname \"\${1}\")   # Directory path
+	file_mac=\$(basename \"\${1}\") # Filename
+	wd_mac=\"\$(pwd)\" # Working directory path
 
-	if [ -e \"\${input_path}\" ]; then # if file or directory exists
-		cd \"\$(dirname \${input_path})\"
-		abs_path=\"\$(pwd)/\$(basename \${input_path})\"
-		cd \"\${cwd}\" # Change directory back to original directory
-	fi
-
-	if [ -e \"\${abs_path}\" ] && ! [ -z \"\${abs_path}\" ]; then
-		echo \"\${abs_path}\"
-	else # Invalid input or script error
-		echo \"\${input_path}\" # echo original input
+	if [ -d \"\${dir_mac}\" ]; then
+		cd \"\${dir_mac}\"
+		echo \"\$(pwd)/\${file_mac}\" # Print full path
+		cd \"\${wd_mac}\" # Change directory back to original directory
+	else
+		echo \"\${1}\" # Print input
 	fi
 } # mac_readlink
 
@@ -2124,34 +2151,6 @@ open_text_editor () { # Opens input file
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
-\${ora}DESCRIPTION\${whi}:
-     
-\${ora}USAGE\${whi}:
- [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
-     
-\${ora}OPTIONS\${whi}: Can input multiple options in any order
- \${pur}-cs\${whi}  Prevent screen from clearing before script processes
- \${pur}-h\${whi} or \${pur}--help\${whi}  Display this message
- \${pur}-nc\${whi}  Prevent color printing in terminal
- \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
-     
-\${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
-     
-\${ora}VERSION: \${gre}\${version_number}\${whi}
-\${red}END OF HELP: \${gre}\${script_path}\${whi}\"
-	exit_message 0
-} # script_usage
-
-re_enter_input_message () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
-	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
-} # re_enter_input_message
-
 exit_message () { # Message before exiting script
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -2178,8 +2177,15 @@ exit_message () { # Message before exiting script
 	exit \"\${exit_type}\"
 } # exit_message
 
+re_enter_input_message () { # Displays invalid input message
+	clear
+	echo \"\${red}INVALID INPUT: \${ora}\"
+	printf '%s\\n' \${@}
+	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
+} # re_enter_input_message
+
 #---------------------------------- CODE -----------------------------------#
-script_path=\$(mac_readlink \"\${script_path}\") # equivalent to 'readlink -f' in linux
+script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval \"\${inputs}\"
@@ -2194,7 +2200,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ \${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0
 fi
@@ -2303,19 +2309,16 @@ create_script () { # Creates, activates and opens new shell script
 } # create_script
 
 mac_readlink () { # Get absolute path of a file
-	input_path="${1}"
-	cwd="$(pwd)" # Current working directory path
+	dir_mac=$(dirname "${1}")   # Directory path
+	file_mac=$(basename "${1}") # Filename
+	wd_mac="$(pwd)" # Working directory path
 
-	if [ -e "${input_path}" ]; then # if file or directory exists
-		cd "$(dirname ${input_path})"
-		abs_path="$(pwd)/$(basename ${input_path})"
-		cd "${cwd}" # Change directory back to original directory
-	fi
-
-	if [ -e "${abs_path}" ] && ! [ -z "${abs_path}" ]; then
-		echo "${abs_path}"
-	else # Invalid input or script error
-		echo "${input_path}" # echo original input
+	if [ -d "${dir_mac}" ]; then
+		cd "${dir_mac}"
+		echo "$(pwd)/${file_mac}" # Print full path
+		cd "${wd_mac}" # Change directory back to original directory
+	else
+		echo "${1}" # Print input
 	fi
 } # mac_readlink
 
@@ -2382,42 +2385,26 @@ read_filename () { # Check if file exists
 } # read_filename
 
 #-------------------------------- MESSAGES ---------------------------------#
-script_usage () { # Script explanation
-	echo "${red}HELP MESSAGE: ${gre}${script_path}${whi}
-${ora}DESCRIPTION${whi}: Create script in working directory
-     
-${ora}ADVICE${whi}: Create an alias inside your ${ora}${HOME}/.bashrc${whi} file
-(e.g. ${gre}alias cs='${script_path}'${whi})
-     
-${ora}USAGE${whi}: Input filename of new script
-  [${ora}1${whi}] ${gre}cs${ora} examplefile1.sh${whi}
-  
-${ora}OPTIONS${whi}: Can input multiple options in any order
- ${pur}-h${whi} or ${pur}--help${whi}  Display this message
- ${pur}-i${whi}   Do ${red}NOT${whi} open script file after it is created
- ${pur}-l${whi}   List default settings
- ${pur}-n${whi}   Which '${gre}create_script${whi}' function to use (${ora}default: ${gre}${default_script_number}${whi})
-  [${ora}2${whi}] ${gre}cs ${pur}-n ${ora}5${whi}
- ${pur}-nc${whi}  Prevent color printing in terminal
- ${pur}-nl${whi}  List comments for each '${gre}create_script${whi}' function
- ${pur}-o${whi} or  ${pur}--open${whi}  Open this script
- ${pur}-p${whi}   Input permission value (${ora}default: ${gre}${permission_value}${whi})
-  [${ora}3${whi}] ${gre}cs ${pur}-p ${ora}744${whi}
-     
-${ora}DEFAULT SETTINGS${whi}:
- Script types: ${gre}`grep -c '^create_script[0-9]' ${script_path}`${whi}
- Text editors: ${gre}${text_editors[@]}${whi}
- Script file permission: ${gre}${permission_value}${whi}
-${ora}VERSION: ${gre}${version_number}${whi}
-${red}END OF HELP: ${gre}${script_path}${whi}"
-
-exit_message 0
-} # script_usage
-
 error_script_create () { # Error message if script could not be created
 echo "${red}COULD NOT CREATE: ${ora}${1}${whi}"
 exit_message 98
 } # error_script_create
+
+exit_message () { # Message before exiting script
+	if [ -z "${1}" 2>/dev/null ] || ! [ "${1}" -eq "${1}" 2>/dev/null ]; then
+		exit_type='0'
+	else
+		exit_type="${1}"
+	fi
+	
+	# Suggest help message
+	if [ "${exit_type}" -ne '0' 2>/dev/null ]; then
+		echo "${ora}TO DISPLAY HELP MESSAGE TYPE: ${gre}${script_path} -h${whi}"
+	fi
+	
+	printf "${formatreset}\n"
+	exit "${exit_type}"
+} # exit_message
 
 list_user_settings () { # '-l' option
 	echo "${pur}+---USER SETTINGS---+${ora}"
@@ -2443,24 +2430,8 @@ re_enter_input_message () { # Displays invalid input message
 	echo "${pur}PLEASE RE-ENTER INPUT${whi}"
 } # re_enter_input_message
 
-exit_message () { # Message before exiting script
-	if [ -z "${1}" 2>/dev/null ] || ! [ "${1}" -eq "${1}" 2>/dev/null ]; then
-		exit_type='0'
-	else
-		exit_type="${1}"
-	fi
-	
-	# Suggest help message
-	if [ "${exit_type}" -ne '0' 2>/dev/null ]; then
-		echo "${ora}TO DISPLAY HELP MESSAGE TYPE: ${gre}${script_path} -h${whi}"
-	fi
-	
-	printf "${formatreset}\n"
-	exit "${exit_type}"
-} # exit_message
-
 #---------------------------------- CODE -----------------------------------#
-script_path=$(mac_readlink "${script_path}") # equivalent to 'readlink -f' in linux
+script_path=$(mac_readlink "${script_path}") # similar to 'readlink -f' in linux
 
 for inputs; do # Reads through all inputs
 	option_eval "${inputs}"
@@ -2473,7 +2444,7 @@ color_formats # Activates or inhibits colorful output
 # Display help message or open file
 if [ "${activate_help}" == 'yes' ]; then # '-h' or '--help'
 	script_usage
-elif [ ${open_script} == 'yes' ]; then   # '-o' or '--open'
+elif [ "${open_script}" == 'yes' ]; then # '-o' or '--open'
 	open_text_editor "${script_path}" ${text_editors[@]}
 	exit_message 0
 fi

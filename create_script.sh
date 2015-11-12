@@ -4,6 +4,7 @@
 # Revised: 06/23/2015 By: Evan Layher
 # Revised: 10/21/2015 By: Evan Layher # (3.0) Mac compatible (and other minor alterations)
 # Revised: 11/06/2015 By: Evan Layher # (3.1) Update create_scriptX functions
+# Revised: 11/11/2015 By: Evan Layher # (3.2) Update 'open_text_editor' functions
 # Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
@@ -80,7 +81,7 @@ exit_message 0
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 todays_date=`date +%x`          # Inputs date inside of script
 script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
-version_number='3.1'            # Script version number
+version_number='3.2'            # Script version number
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'      # 'no' : Display help message      [INPUT: '-h' or '--help']
@@ -225,7 +226,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -494,7 +495,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -772,7 +773,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -1017,7 +1018,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -1266,7 +1267,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -1495,7 +1496,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -1733,7 +1734,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -1938,7 +1939,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -2135,7 +2136,7 @@ open_text_editor () { # Opens input file
 			pid=\"\$!\" # Background process ID
 			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
 			
-			if [ \"\${#check_text_pid[@]}\" -gt '0' ] && [ \"\${check_text_pid[0]}\" == \"\${pid}\" 2>/dev/null ]; then
+			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi
@@ -2332,7 +2333,7 @@ open_text_editor () { # Opens input file
 			pid="$!" # Background process ID
 			check_text_pid=(`ps "${pid}" |grep "${pid}"`) # Check if pid is running
 			
-			if [ "${#check_text_pid[@]}" -gt '0' ] && [ "${check_text_pid[0]}" == "${pid}" 2>/dev/null ]; then
+			if [ "${#check_text_pid[@]}" -gt '0' ]; then
 				valid_text_editor='yes'
 				break
 			fi

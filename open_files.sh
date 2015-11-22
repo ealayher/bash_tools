@@ -79,7 +79,7 @@ open_text_editor () { # Opens input file
 		pid="$!" # Background process ID
 		check_text_pid=(`ps "${pid}" |grep "${pid}"`) # Check if pid is running
 			
-		if [ "${#check_text_pid[@]}" -gt '0' ] && [ "${check_text_pid[0]}" == "${pid}" 2>/dev/null ]; then
+		if [ "${#check_text_pid[@]}" -gt '0' ]; then
 			valid_text_editor='yes'
 			break
 		fi

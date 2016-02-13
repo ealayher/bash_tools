@@ -5,14 +5,15 @@
 # Revised: 10/21/2015 By: Evan Layher # (3.0) Mac compatible (and other minor alterations)
 # Revised: 11/06/2015 By: Evan Layher # (3.1) Update create_scriptX functions
 # Revised: 11/11/2015 By: Evan Layher # (3.2) Update 'open_text_editor' functions
-# Reference: github.com/ealayher
+# Revised: 02/12/2016 By: Evan Layher # (3.3) Minor updates
+# Reference: github.com/ealayher/bash_tools
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
 
 ## --- LICENSE INFORMATION --- ##
 ## create_script.sh is the proprietary property of The Regents of the University of California ("The Regents.")
 
-## Copyright © 2014-15 The Regents of the University of California, Davis campus. All Rights Reserved.
+## Copyright © 2014-16 The Regents of the University of California, Davis campus. All Rights Reserved.
 
 ## Redistribution and use in source and binary forms, with or without modification, are permitted by nonprofit, 
 ## research institutions for research use only, provided that the following conditions are met:
@@ -59,11 +60,10 @@ ${ora}USAGE${whi}: Input filename of new script
 ${ora}OPTIONS${whi}: Can input multiple options in any order
  ${pur}-h${whi} or ${pur}--help${whi}  Display this message
  ${pur}-i${whi}   Do ${red}NOT${whi} open script file after it is created
- ${pur}-l${whi}   List default settings
+ ${pur}-l${whi}   List comments for each '${gre}create_script${whi}' function
  ${pur}-n${whi}   Which '${gre}create_script${whi}' function to use (${ora}default: ${gre}${default_script_number}${whi})
   [${ora}2${whi}] ${gre}cs ${pur}-n ${ora}5${whi}
- ${pur}-nc${whi}  Prevent color printing in terminal
- ${pur}-nl${whi}  List comments for each '${gre}create_script${whi}' function
+ ${pur}-nc${whi}  Prevent color printing in terminal 
  ${pur}-o${whi} or  ${pur}--open${whi}  Open this script
  ${pur}-p${whi}   Input permission value (${ora}default: ${gre}${permission_value}${whi})
   [${ora}3${whi}] ${gre}cs ${pur}-p ${ora}744${whi}
@@ -81,14 +81,13 @@ exit_message 0
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 todays_date=`date +%x`          # Inputs date inside of script
 script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
-version_number='3.2'            # Script version number
+version_number='3.3'            # Script version number
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'      # 'no' : Display help message      [INPUT: '-h' or '--help']
 change_permission='no'  # 'no' : Change permission         [INPUT: '[0-7][0-7][0-7]']
-display_scripts='no'    # 'no' : Display script types      [INPUT: '-nl']
+display_scripts='no'    # 'no' : Display script types      [INPUT: '-l']
 filename_reader='on'    # 'on' : Read in filename ('on' or 'off')
-list_settings='no'      # 'no' : List user settings        [INPUT: '-l']
 open_file='yes'         # 'yes': Open newly created script [INPUT: '-i']
 open_script='no'        # 'no' : Open this script          [INPUT: '-o' or '--open']
 p_in='no'               # 'no' : Read in permission level for output file
@@ -153,9 +152,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -197,7 +196,7 @@ color_formats () { # Print colorful terminal text
 control_bg_jobs () { # Controls number of background processes
 	job_count=\`jobs -p |wc -l\` # Get number of running jobs
 	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
+		sleep 0.1
 		control_bg_jobs
 	fi
 } # control_bg_jobs
@@ -357,9 +356,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -430,9 +429,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -555,8 +554,6 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
-	
-	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -626,9 +623,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -700,9 +697,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -744,7 +741,7 @@ color_formats () { # Print colorful terminal text
 control_bg_jobs () { # Controls number of background processes
 	job_count=\`jobs -p |wc -l\` # Get number of running jobs
 	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
+		sleep 0.1
 		control_bg_jobs
 	fi
 } # control_bg_jobs
@@ -880,9 +877,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -953,9 +950,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nt' 2>/dev/null ] || [ \"\${1}\" == '-nm' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -1054,8 +1051,6 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
-	
-	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -1125,9 +1120,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm -nt
 fi
@@ -1181,7 +1176,6 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
 version_number='1.0' # Script version number
 
@@ -1196,9 +1190,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -1238,7 +1232,7 @@ color_formats () { # Print colorful terminal text
 control_bg_jobs () { # Controls number of background processes
 	job_count=\`jobs -p |wc -l\` # Get number of running jobs
 	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
+		sleep 0.1
 		control_bg_jobs
 	fi
 } # control_bg_jobs
@@ -1363,9 +1357,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1418,7 +1412,6 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
 version_number='1.0' # Script version number
 
@@ -1433,9 +1426,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -1554,8 +1547,6 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
-	
-	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -1592,9 +1583,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1648,7 +1639,6 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
 version_number='1.0' # Script version number
 
@@ -1663,9 +1653,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -1705,7 +1695,7 @@ color_formats () { # Print colorful terminal text
 control_bg_jobs () { # Controls number of background processes
 	job_count=\`jobs -p |wc -l\` # Get number of running jobs
 	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.25
+		sleep 0.1
 		control_bg_jobs
 	fi
 } # control_bg_jobs
@@ -1806,9 +1796,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -1861,7 +1851,6 @@ script_usage () { # Script explanation
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
 version_number='1.0' # Script version number
 
@@ -1876,9 +1865,9 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-nm' 2>/dev/null ] || [ \"\${1}\" == '-o' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -1973,8 +1962,6 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
-	
-	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -2011,9 +1998,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0 -nm
 fi
@@ -2062,7 +2049,6 @@ script_usage () { # Script explanation
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
 script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
 version_number='1.0' # Script version number
 
@@ -2076,8 +2062,8 @@ suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 #-------------------------------- FUNCTIONS --------------------------------#
 option_eval () { # Evaluate inputs
 	if [ \"\${1}\" == '-cs' 2>/dev/null ] || [ \"\${1}\" == '-h' 2>/dev/null ] || \\
-	[ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
-	[ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
+	   [ \"\${1}\" == '--help' 2>/dev/null ] || [ \"\${1}\" == '-nc' 2>/dev/null ] || \\
+	   [ \"\${1}\" == '-o' 2>/dev/null ] || [ \"\${1}\" == '--open' 2>/dev/null ]; then
 		activate_options \"\${1}\"
 	elif [ \"\${1:0:1}\" == '-' 2>/dev/null ]; then
 		bad_inputs+=(\"\${1}\")
@@ -2199,9 +2185,9 @@ fi
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ \"\${activate_help}\" == 'yes' ]; then # '-h' or '--help'
+if [ \"\${activate_help}\" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ \"\${open_script}\" == 'yes' ]; then # '-o' or '--open'
+elif [ \"\${open_script}\" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor \"\${script_path}\" \${text_editors[@]}
 	exit_message 0
 fi
@@ -2228,36 +2214,55 @@ echo "#!/bin/bash
 } # create_script10
 
 option_eval () { # Evaluates command line options
-	check_permission=($(echo "${1}" |grep '[0-7][0-7][0-7]'))
-	
-	if [ ${1} == '-h' 2>/dev/null ] || [ ${1} == '--help' 2>/dev/null ] || \
-	[ ${1} == '-i' 2>/dev/null ] || [ ${1} == '-l' 2>/dev/null ] || \
-	[ ${1} == '-n' 2>/dev/null ] || [ ${1} == '-nc' 2>/dev/null ] || \
-	[ ${1} == '-nl' 2>/dev/null ] || [ ${1} == '-o' 2>/dev/null ] || \
-	[ ${1} == '--open' 2>/dev/null ] || [ ${1} == '-p' 2>/dev/null ]; then
-		activate_options "${1}"
-	elif ! [ -z "${n_in}" 2>/dev/null ] && [ "${n_in}" == 'yes' 2>/dev/null ]; then
-		if [ "${1}" -eq "${1}" 2>/dev/null ] && [ "${1}" -gt '0' 2>/dev/null ] \
-		&& [ -z "${n_script}" 2>/dev/null ]; then
+
+	check_n () { # check integer value for n
+		if [ "${1}" -eq "${1}" 2>/dev/null ] && [ "${1}" -gt '0' 2>/dev/null ] && \
+		   [ -z "${n_script}" 2>/dev/null ]; then
 			n_script="${1}"
 		else
 			bad_inputs+=("-n:${1}")
 		fi
-		n_in='no'
-	elif ! [ -z "${p_in}" 2>/dev/null ] && [ "${p_in}" == 'yes' 2>/dev/null ]; then
+	} # check_n
+	
+	check_p () { # check integer value for p
 		if [ "${#check_permission[@]}" -eq '1' ] && [ "${#check_permission[0]}" -eq '3' ]; then
 			permission_value="${1}"
 		else
 			bad_inputs+=("-p:${1}")
 		fi
+	} # check_p
+	
+	check_permission=($(echo "${1}" |grep '[0-7][0-7][0-7]' |sed 's@^-p@@g'))
+	
+	if [ "${1}" == '-h' 2>/dev/null ] || [ "${1}" == '--help' 2>/dev/null ] || \
+	   [ "${1}" == '-i' 2>/dev/null ] || [ "${1}" == '-l' 2>/dev/null ] || \
+	   [ "${1}" == '-n' 2>/dev/null ] || [ "${1}" == '-nc' 2>/dev/null ] || \
+	   [ "${1}" == '-o' 2>/dev/null ] || [ "${1}" == '--open' 2>/dev/null ] || \
+	   [ "${1}" == '-p' 2>/dev/null ]; then
+		activate_options "${1}"
+	elif [ "${1:0:2}" == '-n' 2>/dev/null ]; then # If no space between '-n' and number
+		check_n "${1:2}" # Check value after '-n'
+	elif [ "${1:0:2}" == '-p' 2>/dev/null ]; then # If no space between '-p' and number
+		check_p "${1:2}" # Check value after '-p'
+	elif ! [ -z "${n_in}" 2>/dev/null ] && [ "${n_in}" == 'yes' 2>/dev/null ]; then
+		check_n "${1}"
+		n_in='no'
+	elif ! [ -z "${p_in}" 2>/dev/null ] && [ "${p_in}" == 'yes' 2>/dev/null ]; then
+		check_p "${1}"
+		p_in='no'
 	elif [ "${1:0:1}" == '-' 2>/dev/null ]; then
 		bad_inputs+=("${1}")
 	else
 		if ! [ "${filename_reader}" == 'off' 2>/dev/null ]; then
 			filename="${1}"
 			filename_reader='off'
-		else
-			bad_inputs+=("${1}")
+		else # Alert user of multiple filename inputs
+			check_filenames=($(printf '%s\n' ${bad_inputs[@]} |grep "^MULTIPLE_FILENAME_INPUTS:${filename}$"))
+			if [ "${#check_filenames[@]}" -eq '0' ]; then
+				bad_inputs+=("MULTIPLE_FILENAME_INPUTS:${filename}" "MULTIPLE_FILENAME_INPUTS:${1}")
+			else
+				bad_inputs+=("MULTIPLE_FILENAME_INPUTS:${1}")
+			fi
 		fi
 	fi
 } # option_eval
@@ -2271,13 +2276,11 @@ activate_options () { # Activate input options
 	elif [ "${1}" == '-i' ]; then
 		open_file='no'        # List user settings
 	elif [ "${1}" == '-l' ]; then
-		list_settings='yes'   # List user settings
+		display_scripts='yes' # List script explanations
 	elif [ "${1}" == '-n' ]; then
 		n_in='yes'            # Which script number to create
 	elif [ "${1}" == '-nc' ]; then
-		activate_colors='no'  # Do not display in color
-	elif [ "${1}" == '-nl' ]; then
-		display_scripts='yes' # List script explanations
+		activate_colors='no'  # Do not display in color	
 	elif [ "${1}" == '-o' ] || [ "${1}" == '--open' ]; then
 		open_script='yes'     # Open this script
 	elif [ "${1}" == '-p' ]; then
@@ -2300,9 +2303,9 @@ color_formats () { # Print colorful terminal text
 } # color_formats
 
 create_script () { # Creates, activates and opens new shell script
-	${script_function} > "${filename}" || error_script_create "${filename}"
+	"${script_function}" > "${filename}" || error_script_create "${filename}"
 	chmod "${permission_value}" "${filename}" # Automatically activates script
-	echo "${gre}CREATED: ${ora}${file_path}${whi}"
+	echo "${gre}CREATED (${pur}${n_script}${gre}): ${ora}${file_path}${whi}"
 			
 	if [ "${open_file}" == 'yes' 2>/dev/null ]; then
 		open_text_editor "${filename}" # open new script
@@ -2387,8 +2390,8 @@ read_filename () { # Check if file exists
 
 #-------------------------------- MESSAGES ---------------------------------#
 error_script_create () { # Error message if script could not be created
-echo "${red}COULD NOT CREATE: ${ora}${1}${whi}"
-exit_message 98
+	echo "${red}COULD NOT CREATE: ${ora}${1}${whi}"
+	exit_message 98
 } # error_script_create
 
 exit_message () { # Message before exiting script
@@ -2407,14 +2410,7 @@ exit_message () { # Message before exiting script
 	exit "${exit_type}"
 } # exit_message
 
-list_user_settings () { # '-l' option
-	echo "${pur}+---USER SETTINGS---+${ora}"
-	echo "${gre}Permission value: ${ora}${permission_value}${whi}"
-	echo "${gre}Text editors: ${ora}${text_editors[@]}${whi}"
-	exit_message 0
-} # list_user_settings
-
-script_display () { # '-nl' option
+script_display () { # '-l' option
 	script_count=(`grep '^create_script[0-9]' "${script_path}" |grep '() {' |awk '{print $1}' |sed 's@create_script@@g'`)
 	creation_scripts=(`grep '^create_script[0-9]' "${script_path}" |grep '() {' |sed 's@ @+-+@g' |awk -F '#' '{print $2}'`)
 	
@@ -2443,9 +2439,9 @@ clear
 color_formats # Activates or inhibits colorful output
 
 # Display help message or open file
-if [ "${activate_help}" == 'yes' ]; then # '-h' or '--help'
+if [ "${activate_help}" == 'yes' 2>/dev/null ]; then # '-h' or '--help'
 	script_usage
-elif [ "${open_script}" == 'yes' ]; then # '-o' or '--open'
+elif [ "${open_script}" == 'yes' 2>/dev/null ]; then # '-o' or '--open'
 	open_text_editor "${script_path}" ${text_editors[@]}
 	exit_message 0
 fi
@@ -2460,9 +2456,7 @@ if [ -z "${n_script}" 2>/dev/null ]; then
 	n_script="${default_script_number}" # Create default template
 fi
 
-if [ "${list_settings}" == 'yes' 2>/dev/null ]; then     # '-l'
-	list_user_settings
-elif [ "${display_scripts}" == 'yes' 2>/dev/null ]; then # '-nl'
+if [ "${display_scripts}" == 'yes' 2>/dev/null ]; then # '-l'
 	script_display
 else # Check existence of 'create_script' function
 	script_function="create_script${n_script}"

@@ -2,12 +2,12 @@
 #--------------------------------------------------------------------------------------#
 # Created: 10/19/2015 By: Evan Layher (evan.layher@psych.ucsb.edu)
 # Revised: 10/21/2015 By: Evan Layher
-# Revised: 11/01/2015 By: Evan Layher # Excepts non-file inputs
+# Revised: 11/01/2015 By: Evan Layher # Accepts non-file inputs
 # Reference: github.com/ealayher
 #--------------------------------------------------------------------------------------#
 # Output absolute path of directory or file (whether or not file exists)
 # Equivalent to linux 'readlink -f' function except also deals with non-files
-# If input is not valid, then output is just the input
+# If input directory is missing, then output is the input
 # EXAMPLE USAGE: x=$(mac_readlink '../test_dir/test_file.sh')
 
 mac_readlink () { # Get absolute path of a file

@@ -18,7 +18,7 @@ max_bg_jobs='10' # Maximum number of background processes
 control_bg_jobs () { # Controls number of background processes
 	job_count=`jobs -p |wc -l`
 	if [ "${job_count}" -ge "${max_bg_jobs}" ]; then
-		sleep 0.25     # Check every 0.25 seconds
+		sleep 0.1     # Check every 0.1 seconds
 		control_bg_jobs
 	fi
 } # control_bg_jobs

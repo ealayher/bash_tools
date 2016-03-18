@@ -6,6 +6,7 @@
 # Revised: 11/06/2015 By: Evan Layher # (3.1) Update create_scriptX functions
 # Revised: 11/11/2015 By: Evan Layher # (3.2) Update 'open_text_editor' functions
 # Revised: 02/12/2016 By: Evan Layher # (3.3) Minor updates
+# Revised: 03/16/2016 By: Evan Layher # (3.4) Changed IFS='\n' + minor updates
 # Reference: github.com/ealayher/bash_tools
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
@@ -81,7 +82,7 @@ exit_message 0
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 todays_date=`date +%x`          # Inputs date inside of script
 script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
-version_number='3.3'            # Script version number
+version_number='3.4'            # Script version number
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'      # 'no' : Display help message      [INPUT: '-h' or '--help']
@@ -107,6 +108,8 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -304,6 +307,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -384,6 +388,8 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -571,6 +577,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -652,6 +659,8 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -825,6 +834,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -905,6 +915,8 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1068,6 +1080,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -1149,6 +1162,8 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1176,8 +1191,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -1333,6 +1348,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -1385,6 +1401,8 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1412,8 +1430,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -1559,6 +1577,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -1612,6 +1631,8 @@ echo "#!/bin/bash
 max_bg_jobs='10' # '10': Max number of background processes
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1639,8 +1660,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -1772,6 +1793,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -1824,6 +1846,8 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1851,8 +1875,8 @@ script_usage () { # Script explanation
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -1974,6 +1998,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 
@@ -2026,6 +2051,8 @@ echo "#!/bin/bash
 #--------------------------- DEFAULT SETTINGS ------------------------------#
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -2049,8 +2076,8 @@ script_usage () { # Script explanation
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -2161,6 +2188,7 @@ exit_message () { # Message before exiting script
 	fi
 	
 	printf \"\${formatreset}\\n\"
+	IFS=\"\${IFS_original}\" # Reset IFS
 	exit \"\${exit_type}\"
 } # exit_message
 

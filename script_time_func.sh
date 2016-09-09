@@ -2,8 +2,9 @@
 #--------------------------------------------------------------------------------------#
 # Created: 08/31/2014 By: Evan Layher (evan.layher@psych.ucsb.edu)
 # Revised: 10/21/2015 By: Evan Layher
+# Revised: 09/09/2015 By: Evan Layher # Time output only and allow user input
 #--------------------------------------------------------------------------------------#
-# Calculates the amount of time it takes to run a shell script
+# Display process time of a script
 # Simply source this script and input: script_time_func
 
 # EXAMPLE:
@@ -18,7 +19,7 @@
 ## --- LICENSE INFORMATION --- ##
 ## script_time_func.sh is the proprietary property of The Regents of the University of California ("The Regents.")
 
-## Copyright © 2014-15 The Regents of the University of California, Davis campus. All Rights Reserved.
+## Copyright © 2014-16 The Regents of the University of California, Davis campus. All Rights Reserved.
 
 ## Redistribution and use in source and binary forms, with or without modification, are permitted by nonprofit, 
 ## research institutions for research use only, provided that the following conditions are met:
@@ -44,45 +45,38 @@
 ## For commercial license information please contact copyright@ucdavis.edu.
 ## --------------------------- ##
 
-#------------------------- GENERAL SCRIPT VARIABLES ------------------------#
-script_start_time=`date +%s`           # Time in seconds.
-script_start_date_time=`date +%x' '%r` # (e.g. 01/01/2015 12:00:00 AM)
-script_path="${BASH_SOURCE[0]}"        # Script path
-#------------------------- CALCULATES PROCESS TIME: ------------------------#
-script_time_message () { # Script process time message
-	echo "STARTED : ${script_start_date_time}"
-	echo "FINISHED: `date +%x' '%r`"
-} # script_time_message
+script_start_time=$(date +%s) # Time in seconds
 
 script_time_func () { # Script process time calculation
-	script_end_time=`date +%s`
-	script_process_time=$((${script_end_time} - ${script_start_time}))
-	days=$((${script_process_time} / 86400))
-	hours=$((${script_process_time} % 86400 / 3600))
-	mins=$((${script_process_time} % 3600 / 60))
-	secs=$((${script_process_time} % 60))
-	time_message=("PROCESS TIME: ")
+	func_end_time=$(date +%s) # Time in seconds
+	user_input_time="${1}"
+	valid_display_time='yes'
 	
-	if [ "${days}" -gt '0' ]; then 
-		time_message+=("${days} day(s) ${hours} hour(s) ${mins} minute(s) ${secs} second(s)")
-	elif [ "${hours}" -gt '0' ]; then
-		time_message+=("${hours} hour(s) ${mins} minute(s) ${secs} second(s)")
-	elif [ "${mins}" -gt '0' ]; then
-		time_message+=("${mins} minute(s) ${secs} second(s)")
-	else
-		time_message+=("${secs} second(s)")
+	if ! [ -z "${user_input_time}" ] && [ "${user_input_time}" -eq "${user_input_time}" 2>/dev/null ]; then
+		func_start_time="${user_input_time}"
+	elif ! [ -z "${script_start_time}" ] && [ "${script_start_time}" -eq "${script_start_time}" 2>/dev/null ]; then
+		func_start_time="${script_start_time}"
+	else # If no integer input or 'script_start_time' undefined
+		valid_display_time='no'
 	fi
 	
-	script_time_message
-	echo ${time_message[@]}
+	if [ "${valid_display_time}" == 'yes' ]; then
+		script_process_time=$((${func_end_time} - ${func_start_time}))
+		days=$((${script_process_time} / 86400))
+		hours=$((${script_process_time} % 86400 / 3600))
+		mins=$((${script_process_time} % 3600 / 60))
+		secs=$((${script_process_time} % 60))
+	
+		if [ "${days}" -gt '0' ]; then 
+			echo "PROCESS TIME: ${days} day(s) ${hours} hour(s) ${mins} minute(s) ${secs} second(s)"
+		elif [ "${hours}" -gt '0' ]; then
+			echo "PROCESS TIME: ${hours} hour(s) ${mins} minute(s) ${secs} second(s)"
+		elif [ "${mins}" -gt '0' ]; then
+			echo "PROCESS TIME: ${mins} minute(s) ${secs} second(s)"
+		else
+			echo "PROCESS TIME: ${secs} second(s)"
+		fi
+	else # Unknown start time
+		echo "UNKNOWN PROCESS TIME"
+	fi # if [ "${valid_display_time}" == 'yes' ]
 } # script_time_func
-
-#---------------------------------- CODE -----------------------------------#
-ealayher_code_dir="${HOME}/.ealayher_code"
-
-# Creates master copy of script
-if ! [ -d ${ealayher_code_dir} ]; then
-	mkdir "${ealayher_code_dir}"
-fi
-
-cp "${script_path}" "${ealayher_code_dir}"

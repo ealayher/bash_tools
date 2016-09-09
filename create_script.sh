@@ -7,6 +7,7 @@
 # Revised: 11/11/2015 By: Evan Layher # (3.2) Update 'open_text_editor' functions
 # Revised: 02/12/2016 By: Evan Layher # (3.3) Minor updates
 # Revised: 03/16/2016 By: Evan Layher # (3.4) Changed IFS='\n' + minor updates
+# Revised: 09/09/2016 By: Evan Layher # (3.5) Updated functions + minor updates
 # Reference: github.com/ealayher/bash_tools
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
@@ -80,9 +81,10 @@ exit_message 0
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-todays_date=`date +%x`          # Inputs date inside of script
+todays_date=$(date +%x)         # Inputs date inside of script
 script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
-version_number='3.4'            # Script version number
+version_number='3.5'            # Script version number
+
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'      # 'no' : Display help message      [INPUT: '-h' or '--help']
@@ -105,11 +107,11 @@ echo "#!/bin/bash
 #-------------------------------- VARIABLES --------------------------------#
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
-max_bg_jobs='10' # '10': Max number of background processes
+max_bg_jobs='5' # Maximum number of background processes (1-10)
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -130,7 +132,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -138,10 +141,9 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\`           # Time in seconds.
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_start_time=\$(date +%s)   # Time in seconds
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -186,22 +188,42 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
 control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.1
-		control_bg_jobs
-	fi
+	if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]; then
+		wait # Proceed after all background processes are finished
+	else
+		if [ \"\${max_bg_jobs}\" -gt '1' 2>/dev/null ] && [ \"\${max_bg_jobs}\" -le '10' 2>/dev/null ]; then 
+			true # Make sure variable is defined and valid number
+		elif [ \"\${max_bg_jobs}\" -gt '10' 2>/dev/null ]; then
+			echo \"RESTRICTING BACKGROUND PROCESSES TO 10\"
+			max_bg_jobs='10' # Background jobs should not exceed '10' (Lowers risk of crashing)
+		else # If 'max_bg_jobs' not defined as integer
+			echo \"INVALID VALUE: max_bg_jobs='\${max_bg_jobs}'\"
+			max_bg_jobs='1'
+		fi
+	
+		job_count=(\$(jobs -p)) # Place job IDs into array
+		if ! [ \"\$?\" -eq '0' ]; then
+			echo \"JOB COUNT FAIL (control_bg_jobs): RESTRICTING BACKGROUND PROCESSES\"
+			max_bg_jobs='1'
+			wait
+		else
+			if [ \"\${#job_count[@]}\" -ge \"\${max_bg_jobs}\" ]; then
+				sleep 0.2
+				control_bg_jobs
+			fi
+		fi # if ! [ \"\$?\" -eq '0' ]
+	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
 mac_readlink () { # Get absolute path of a file
@@ -226,7 +248,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -235,7 +257,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm -nt
 		fi
 	else
@@ -261,8 +284,8 @@ vital_file () { # exits script if an essential file is missing
 	done
 	
 	if [ \"\${#bad_files[@]}\" -gt '0' ]; then
-		echo \"\${red}MISSING ESSENTIAL FILE(S):\${pur}\"
-		printf '%s\\n' \${bad_files[@]}
+		echo \"\${red}MISSING ESSENTIAL FILE(S):\${whi}\"
+		printf \"\${pur}%s\${IFS}\${whi}\" \${bad_files[@]}
 		exit_message 97 -nh -nm -nt
 	fi
 } # vital_file
@@ -313,37 +336,43 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
 script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
+	func_end_time=\$(date +%s) # Time in seconds
+	user_input_time=\"\${1}\"
+	valid_display_time='yes'
 	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
+	if ! [ -z \"\${user_input_time}\" ] && [ \"\${user_input_time}\" -eq \"\${user_input_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${user_input_time}\"
+	elif ! [ -z \"\${script_start_time}\" ] && [ \"\${script_start_time}\" -eq \"\${script_start_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${script_start_time}\"
+	else # If no integer input or 'script_start_time' undefined
+		valid_display_time='no'
 	fi
 	
-	script_time_message
-	echo \${time_message[@]}
+	if [ \"\${valid_display_time}\" == 'yes' ]; then
+		script_process_time=\$((\${func_end_time} - \${func_start_time}))
+		days=\$((\${script_process_time} / 86400))
+		hours=\$((\${script_process_time} % 86400 / 3600))
+		mins=\$((\${script_process_time} % 3600 / 60))
+		secs=\$((\${script_process_time} % 60))
+	
+		if [ \"\${days}\" -gt '0' ]; then 
+			echo \"PROCESS TIME: \${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${hours}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${mins}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${mins} minute(s) \${secs} second(s)\"
+		else
+			echo \"PROCESS TIME: \${secs} second(s)\"
+		fi
+	else # Unknown start time
+		echo \"UNKNOWN PROCESS TIME\"
+	fi # if [ \"\${valid_display_time}\" == 'yes' ]
 } # script_time_func
 
 #---------------------------------- CODE -----------------------------------#
@@ -389,7 +418,7 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -410,7 +439,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -418,10 +448,9 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\`           # Time in seconds.
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_start_time=\$(date +%s)   # Time in seconds
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -466,13 +495,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -498,7 +527,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -507,7 +536,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm -nt
 		fi
 	else
@@ -533,8 +563,8 @@ vital_file () { # exits script if an essential file is missing
 	done
 	
 	if [ \"\${#bad_files[@]}\" -gt '0' ]; then
-		echo \"\${red}MISSING ESSENTIAL FILE(S):\${pur}\"
-		printf '%s\\n' \${bad_files[@]}
+		echo \"\${red}MISSING ESSENTIAL FILE(S):\${whi}\"
+		printf \"\${pur}%s\${IFS}\${whi}\" \${bad_files[@]}
 		exit_message 97 -nh -nm -nt
 	fi
 } # vital_file
@@ -560,6 +590,8 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
+	
+	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -583,37 +615,43 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
 script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
+	func_end_time=\$(date +%s) # Time in seconds
+	user_input_time=\"\${1}\"
+	valid_display_time='yes'
 	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
+	if ! [ -z \"\${user_input_time}\" ] && [ \"\${user_input_time}\" -eq \"\${user_input_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${user_input_time}\"
+	elif ! [ -z \"\${script_start_time}\" ] && [ \"\${script_start_time}\" -eq \"\${script_start_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${script_start_time}\"
+	else # If no integer input or 'script_start_time' undefined
+		valid_display_time='no'
 	fi
 	
-	script_time_message
-	echo \${time_message[@]}
+	if [ \"\${valid_display_time}\" == 'yes' ]; then
+		script_process_time=\$((\${func_end_time} - \${func_start_time}))
+		days=\$((\${script_process_time} / 86400))
+		hours=\$((\${script_process_time} % 86400 / 3600))
+		mins=\$((\${script_process_time} % 3600 / 60))
+		secs=\$((\${script_process_time} % 60))
+	
+		if [ \"\${days}\" -gt '0' ]; then 
+			echo \"PROCESS TIME: \${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${hours}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${mins}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${mins} minute(s) \${secs} second(s)\"
+		else
+			echo \"PROCESS TIME: \${secs} second(s)\"
+		fi
+	else # Unknown start time
+		echo \"UNKNOWN PROCESS TIME\"
+	fi # if [ \"\${valid_display_time}\" == 'yes' ]
 } # script_time_func
 
 #---------------------------------- CODE -----------------------------------#
@@ -656,11 +694,11 @@ echo "#!/bin/bash
 #-------------------------------- VARIABLES --------------------------------#
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
-max_bg_jobs='10' # '10': Max number of background processes
+max_bg_jobs='5' # Maximum number of background processes (1-10)
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -681,7 +719,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -689,10 +728,9 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\`           # Time in seconds.
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_start_time=\$(date +%s)   # Time in seconds
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -737,22 +775,42 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
 control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.1
-		control_bg_jobs
-	fi
+	if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]; then
+		wait # Proceed after all background processes are finished
+	else
+		if [ \"\${max_bg_jobs}\" -gt '1' 2>/dev/null ] && [ \"\${max_bg_jobs}\" -le '10' 2>/dev/null ]; then 
+			true # Make sure variable is defined and valid number
+		elif [ \"\${max_bg_jobs}\" -gt '10' 2>/dev/null ]; then
+			echo \"RESTRICTING BACKGROUND PROCESSES TO 10\"
+			max_bg_jobs='10' # Background jobs should not exceed '10' (Lowers risk of crashing)
+		else # If 'max_bg_jobs' not defined as integer
+			echo \"INVALID VALUE: max_bg_jobs='\${max_bg_jobs}'\"
+			max_bg_jobs='1'
+		fi
+	
+		job_count=(\$(jobs -p)) # Place job IDs into array
+		if ! [ \"\$?\" -eq '0' ]; then
+			echo \"JOB COUNT FAIL (control_bg_jobs): RESTRICTING BACKGROUND PROCESSES\"
+			max_bg_jobs='1'
+			wait
+		else
+			if [ \"\${#job_count[@]}\" -ge \"\${max_bg_jobs}\" ]; then
+				sleep 0.2
+				control_bg_jobs
+			fi
+		fi # if ! [ \"\$?\" -eq '0' ]
+	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
 mac_readlink () { # Get absolute path of a file
@@ -777,7 +835,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -786,7 +844,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm -nt
 		fi
 	else
@@ -840,37 +899,43 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
 script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
+	func_end_time=\$(date +%s) # Time in seconds
+	user_input_time=\"\${1}\"
+	valid_display_time='yes'
 	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
+	if ! [ -z \"\${user_input_time}\" ] && [ \"\${user_input_time}\" -eq \"\${user_input_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${user_input_time}\"
+	elif ! [ -z \"\${script_start_time}\" ] && [ \"\${script_start_time}\" -eq \"\${script_start_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${script_start_time}\"
+	else # If no integer input or 'script_start_time' undefined
+		valid_display_time='no'
 	fi
 	
-	script_time_message
-	echo \${time_message[@]}
+	if [ \"\${valid_display_time}\" == 'yes' ]; then
+		script_process_time=\$((\${func_end_time} - \${func_start_time}))
+		days=\$((\${script_process_time} / 86400))
+		hours=\$((\${script_process_time} % 86400 / 3600))
+		mins=\$((\${script_process_time} % 3600 / 60))
+		secs=\$((\${script_process_time} % 60))
+	
+		if [ \"\${days}\" -gt '0' ]; then 
+			echo \"PROCESS TIME: \${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${hours}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${mins}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${mins} minute(s) \${secs} second(s)\"
+		else
+			echo \"PROCESS TIME: \${secs} second(s)\"
+		fi
+	else # Unknown start time
+		echo \"UNKNOWN PROCESS TIME\"
+	fi # if [ \"\${valid_display_time}\" == 'yes' ]
 } # script_time_func
 
 #---------------------------------- CODE -----------------------------------#
@@ -916,7 +981,7 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -937,7 +1002,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -945,10 +1011,9 @@ script_usage () { # Script explanation: '-h' or '--help' option
 } # script_usage
 
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
-script_start_time=\`date +%s\`           # Time in seconds.
-script_start_date_time=\`date +%x' '%r\` # (e.g. 01/01/2015 12:00:00 AM)
-script_path=\"\${BASH_SOURCE[0]}\"        # Script path (becomes absolute path later)
-version_number='1.0' # Script version number
+script_start_time=\$(date +%s)   # Time in seconds
+script_path=\"\${BASH_SOURCE[0]}\" # Script path (becomes absolute path later)
+version_number='1.0'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
@@ -993,13 +1058,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1025,7 +1090,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -1034,7 +1099,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm -nt
 		fi
 	else
@@ -1063,6 +1129,8 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
+	
+	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -1086,37 +1154,43 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
-script_time_message () { # Script process time message
-	echo \"STARTED : \${script_start_date_time}\"
-	echo \"FINISHED: \`date +%x' '%r\`\"
-} # script_time_message
-
 script_time_func () { # Script process time calculation
-	script_end_time=\`date +%s\`
-	script_process_time=\$((\${script_end_time} - \${script_start_time}))
-	days=\$((\${script_process_time} / 86400))
-	hours=\$((\${script_process_time} % 86400 / 3600))
-	mins=\$((\${script_process_time} % 3600 / 60))
-	secs=\$((\${script_process_time} % 60))
-	time_message=(\"PROCESS TIME: \")
+	func_end_time=\$(date +%s) # Time in seconds
+	user_input_time=\"\${1}\"
+	valid_display_time='yes'
 	
-	if [ \"\${days}\" -gt '0' ]; then 
-		time_message+=(\"\${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${hours}\" -gt '0' ]; then
-		time_message+=(\"\${hours} hour(s) \${mins} minute(s) \${secs} second(s)\")
-	elif [ \"\${mins}\" -gt '0' ]; then
-		time_message+=(\"\${mins} minute(s) \${secs} second(s)\")
-	else
-		time_message+=(\"\${secs} second(s)\")
+	if ! [ -z \"\${user_input_time}\" ] && [ \"\${user_input_time}\" -eq \"\${user_input_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${user_input_time}\"
+	elif ! [ -z \"\${script_start_time}\" ] && [ \"\${script_start_time}\" -eq \"\${script_start_time}\" 2>/dev/null ]; then
+		func_start_time=\"\${script_start_time}\"
+	else # If no integer input or 'script_start_time' undefined
+		valid_display_time='no'
 	fi
 	
-	script_time_message
-	echo \${time_message[@]}
+	if [ \"\${valid_display_time}\" == 'yes' ]; then
+		script_process_time=\$((\${func_end_time} - \${func_start_time}))
+		days=\$((\${script_process_time} / 86400))
+		hours=\$((\${script_process_time} % 86400 / 3600))
+		mins=\$((\${script_process_time} % 3600 / 60))
+		secs=\$((\${script_process_time} % 60))
+	
+		if [ \"\${days}\" -gt '0' ]; then 
+			echo \"PROCESS TIME: \${days} day(s) \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${hours}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${hours} hour(s) \${mins} minute(s) \${secs} second(s)\"
+		elif [ \"\${mins}\" -gt '0' ]; then
+			echo \"PROCESS TIME: \${mins} minute(s) \${secs} second(s)\"
+		else
+			echo \"PROCESS TIME: \${secs} second(s)\"
+		fi
+	else # Unknown start time
+		echo \"UNKNOWN PROCESS TIME\"
+	fi # if [ \"\${valid_display_time}\" == 'yes' ]
 } # script_time_func
 
 #---------------------------------- CODE -----------------------------------#
@@ -1159,11 +1233,11 @@ echo "#!/bin/bash
 #-------------------------------- VARIABLES --------------------------------#
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
-max_bg_jobs='10' # '10': Max number of background processes
+max_bg_jobs='5' # Maximum number of background processes (1-10)
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1183,7 +1257,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -1234,22 +1309,42 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
 control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.1
-		control_bg_jobs
-	fi
+	if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]; then
+		wait # Proceed after all background processes are finished
+	else
+		if [ \"\${max_bg_jobs}\" -gt '1' 2>/dev/null ] && [ \"\${max_bg_jobs}\" -le '10' 2>/dev/null ]; then 
+			true # Make sure variable is defined and valid number
+		elif [ \"\${max_bg_jobs}\" -gt '10' 2>/dev/null ]; then
+			echo \"RESTRICTING BACKGROUND PROCESSES TO 10\"
+			max_bg_jobs='10' # Background jobs should not exceed '10' (Lowers risk of crashing)
+		else # If 'max_bg_jobs' not defined as integer
+			echo \"INVALID VALUE: max_bg_jobs='\${max_bg_jobs}'\"
+			max_bg_jobs='1'
+		fi
+	
+		job_count=(\$(jobs -p)) # Place job IDs into array
+		if ! [ \"\$?\" -eq '0' ]; then
+			echo \"JOB COUNT FAIL (control_bg_jobs): RESTRICTING BACKGROUND PROCESSES\"
+			max_bg_jobs='1'
+			wait
+		else
+			if [ \"\${#job_count[@]}\" -ge \"\${max_bg_jobs}\" ]; then
+				sleep 0.2
+				control_bg_jobs
+			fi
+		fi # if ! [ \"\$?\" -eq '0' ]
+	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
 mac_readlink () { # Get absolute path of a file
@@ -1274,7 +1369,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -1283,7 +1378,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm
 		fi
 	else
@@ -1309,8 +1405,8 @@ vital_file () { # exits script if an essential file is missing
 	done
 	
 	if [ \"\${#bad_files[@]}\" -gt '0' ]; then
-		echo \"\${red}MISSING ESSENTIAL FILE(S):\${pur}\"
-		printf '%s\\n' \${bad_files[@]}
+		echo \"\${red}MISSING ESSENTIAL FILE(S):\${whi}\"
+		printf \"\${pur}%s\${IFS}\${whi}\" \${bad_files[@]}
 		exit_message 97 -nh -nm
 	fi
 } # vital_file
@@ -1354,8 +1450,8 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
@@ -1402,7 +1498,7 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1422,7 +1518,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -1473,13 +1570,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1505,7 +1602,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -1514,7 +1611,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm
 		fi
 	else
@@ -1540,8 +1638,8 @@ vital_file () { # exits script if an essential file is missing
 	done
 	
 	if [ \"\${#bad_files[@]}\" -gt '0' ]; then
-		echo \"\${red}MISSING ESSENTIAL FILE(S):\${pur}\"
-		printf '%s\\n' \${bad_files[@]}
+		echo \"\${red}MISSING ESSENTIAL FILE(S):\${whi}\"
+		printf \"\${pur}%s\${IFS}\${whi}\" \${bad_files[@]}
 		exit_message 97 -nh -nm
 	fi
 } # vital_file
@@ -1565,6 +1663,8 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
+	
+	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -1583,8 +1683,8 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
@@ -1628,11 +1728,11 @@ echo "#!/bin/bash
 #-------------------------------- VARIABLES --------------------------------#
 
 #--------------------------- DEFAULT SETTINGS ------------------------------#
-max_bg_jobs='10' # '10': Max number of background processes
+max_bg_jobs='5' # Maximum number of background processes (1-10)
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
 script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
@@ -1652,7 +1752,8 @@ script_usage () { # Script explanation: '-h' or '--help' option
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -1703,22 +1804,42 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
 control_bg_jobs () { # Controls number of background processes
-	job_count=\`jobs -p |wc -l\` # Get number of running jobs
-	if [ \"\${job_count}\" -ge \"\${max_bg_jobs}\" ]; then
-		sleep 0.1
-		control_bg_jobs
-	fi
+	if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]; then
+		wait # Proceed after all background processes are finished
+	else
+		if [ \"\${max_bg_jobs}\" -gt '1' 2>/dev/null ] && [ \"\${max_bg_jobs}\" -le '10' 2>/dev/null ]; then 
+			true # Make sure variable is defined and valid number
+		elif [ \"\${max_bg_jobs}\" -gt '10' 2>/dev/null ]; then
+			echo \"RESTRICTING BACKGROUND PROCESSES TO 10\"
+			max_bg_jobs='10' # Background jobs should not exceed '10' (Lowers risk of crashing)
+		else # If 'max_bg_jobs' not defined as integer
+			echo \"INVALID VALUE: max_bg_jobs='\${max_bg_jobs}'\"
+			max_bg_jobs='1'
+		fi
+	
+		job_count=(\$(jobs -p)) # Place job IDs into array
+		if ! [ \"\$?\" -eq '0' ]; then
+			echo \"JOB COUNT FAIL (control_bg_jobs): RESTRICTING BACKGROUND PROCESSES\"
+			max_bg_jobs='1'
+			wait
+		else
+			if [ \"\${#job_count[@]}\" -ge \"\${max_bg_jobs}\" ]; then
+				sleep 0.2
+				control_bg_jobs
+			fi
+		fi # if ! [ \"\$?\" -eq '0' ]
+	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
 mac_readlink () { # Get absolute path of a file
@@ -1743,7 +1864,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -1752,7 +1873,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm
 		fi
 	else
@@ -1799,8 +1921,8 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
@@ -1847,9 +1969,9 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
-script_usage () { # Script explanation
+script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
 \${ora}DESCRIPTION\${whi}:
      
@@ -1867,7 +1989,8 @@ script_usage () { # Script explanation
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -1918,13 +2041,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -1950,7 +2073,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -1959,7 +2082,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh -nm
 		fi
 	else
@@ -1986,6 +2110,8 @@ exit_message () { # Message before exiting script
 			display_exit='no'
 		fi
 	done
+	
+	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -2004,8 +2130,8 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
@@ -2052,11 +2178,14 @@ echo "#!/bin/bash
 text_editors=('kwrite' 'gedit' 'open -a /Applications/TextWrangler.app' 'open' 'nano' 'emacs') # text editor commands in order of preference
 
 IFS_original=\"\${IFS}\" # whitespace separator
-IFS=\$'\n' # newline separator (needed when paths have whitespace)
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
 #------------------------- SCRIPT HELP MESSAGE -----------------------------#
-script_usage () { # Script explanation
+script_usage () { # Script explanation: '-h' or '--help' option
 	echo \"\${red}HELP MESSAGE: \${gre}\${script_path}\${whi}
 \${ora}DESCRIPTION\${whi}:
+     
+\${ora}ADVICE\${whi}: Create an alias inside your \${ora}\${HOME}/.bashrc\${whi} file
+(e.g. \${gre}alias xx='\${script_path}'\${whi})
      
 \${ora}USAGE\${whi}:
  [\${ora}1\${whi}] \${gre}\${script_path}\${whi}
@@ -2068,7 +2197,8 @@ script_usage () { # Script explanation
  \${pur}-o\${whi} or \${pur}--open\${whi} Open this script
      
 \${ora}DEFAULT SETTINGS\${whi}:
- text editors: \${gre}\${text_editors[@]}\${whi}
+text editors: 
+\${gre}\${text_editors[@]}\${whi}
      
 \${ora}VERSION: \${gre}\${version_number}\${whi}
 \${red}END OF HELP: \${gre}\${script_path}\${whi}\"
@@ -2115,13 +2245,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ \"\${activate_colors}\" == 'yes' 2>/dev/null ]; then
-		whi=\`tput setab 0; tput setaf 7\` # Black background, white text
-		red=\`tput setab 0; tput setaf 1\` # Black background, red text
-		ora=\`tput setab 0; tput setaf 3\` # Black background, orange text
-		gre=\`tput setab 0; tput setaf 2\` # Black background, green text
-		blu=\`tput setab 0; tput setaf 4\` # Black background, blue text
-		pur=\`tput setab 0; tput setaf 5\` # Black background, purple text
-		formatreset=\`tput sgr0\`          # Reset to default terminal settings
+		whi=\$(tput setab 0; tput setaf 7) # Black background, white text
+		red=\$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=\$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=\$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=\$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=\$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -2147,7 +2277,7 @@ open_text_editor () { # Opens input file
 		for i in \${!text_editors[@]}; do # Loop through indices
 			\${text_editors[i]} \"\${file_to_open}\" 2>/dev/null &
 			pid=\"\$!\" # Background process ID
-			check_text_pid=(\`ps \"\${pid}\" |grep \"\${pid}\"\`) # Check if pid is running
+			check_text_pid=(\$(ps \"\${pid}\" |grep \"\${pid}\")) # Check if pid is running
 			
 			if [ \"\${#check_text_pid[@]}\" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -2156,7 +2286,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ \"\${valid_text_editor}\" == 'no' 2>/dev/null ]; then
-			echo \"\${red}NO VALID TEXT EDITORS: \${ora}\${text_editors[@]}\${whi}\"
+			echo \"\${red}NO VALID TEXT EDITORS:\${whi}\"
+			printf \"\${ora}%s\${IFS}\${whi}\" \${text_editors[@]}
 			exit_message 99 -nh
 		fi
 	else
@@ -2181,6 +2312,8 @@ exit_message () { # Message before exiting script
 			suggest_help='no'
 		fi
 	done
+	
+	wait # Waits for background processes to finish before exiting
 
 	# Suggest help message
 	if [ \"\${suggest_help}\" == 'yes' 2>/dev/null ]; then
@@ -2194,8 +2327,8 @@ exit_message () { # Message before exiting script
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo \"\${red}INVALID INPUT: \${ora}\"
-	printf '%s\\n' \${@}
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
 	echo \"\${pur}PLEASE RE-ENTER INPUT\${whi}\"
 } # re_enter_input_message
 
@@ -2237,8 +2370,12 @@ echo "#!/bin/bash
 #--------------------------------------------------------------------------------------#
 #
 #-------------------------------- VARIABLES --------------------------------#
+IFS_original=\"\${IFS}\" # whitespace separator
+IFS=\$'\\n' # newline separator (needed when paths have whitespace)
+#---------------------------------- CODE -----------------------------------#
 
-#---------------------------------- CODE -----------------------------------#"
+IFS=\"\${IFS_original}\"
+exit 0"
 } # create_script10
 
 option_eval () { # Evaluates command line options
@@ -2320,13 +2457,13 @@ activate_options () { # Activate input options
 
 color_formats () { # Print colorful terminal text
 	if [ "${activate_colors}" == 'yes' 2>/dev/null ]; then
-		whi=`tput setab 0; tput setaf 7` # Black background, white text
-		red=`tput setab 0; tput setaf 1` # Black background, red text
-		ora=`tput setab 0; tput setaf 3` # Black background, orange text
-		gre=`tput setab 0; tput setaf 2` # Black background, green text
-		blu=`tput setab 0; tput setaf 4` # Black background, blue text
-		pur=`tput setab 0; tput setaf 5` # Black background, purple text
-		formatreset=`tput sgr0`          # Reset to default terminal settings
+		whi=$(tput setab 0; tput setaf 7) # Black background, white text
+		red=$(tput setab 0; tput setaf 1) # Black background, red text
+		ora=$(tput setab 0; tput setaf 3) # Black background, orange text
+		gre=$(tput setab 0; tput setaf 2) # Black background, green text
+		blu=$(tput setab 0; tput setaf 4) # Black background, blue text
+		pur=$(tput setab 0; tput setaf 5) # Black background, purple text
+		formatreset=$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
 
@@ -2362,7 +2499,7 @@ open_text_editor () { # Opens input file
 		for i in ${!text_editors[@]}; do # Loop through indices
 			${text_editors[i]} "${file_to_open}" 2>/dev/null &
 			pid="$!" # Background process ID
-			check_text_pid=(`ps "${pid}" |grep "${pid}"`) # Check if pid is running
+			check_text_pid=($(ps "${pid}" |grep "${pid}")) # Check if pid is running
 			
 			if [ "${#check_text_pid[@]}" -gt '0' ]; then
 				valid_text_editor='yes'
@@ -2371,7 +2508,8 @@ open_text_editor () { # Opens input file
 		done
 
 		if [ "${valid_text_editor}" == 'no' 2>/dev/null ]; then
-			echo "${red}NO VALID TEXT EDITORS: ${ora}${text_editors[@]}${whi}"
+			echo "${red}NO VALID TEXT EDITORS:${whi}"
+			printf "${ora}%s${IFS}${whi}" ${text_editors[@]}
 			exit_message 99
 		fi
 	else
@@ -2450,8 +2588,8 @@ script_display () { # '-l' option
 
 re_enter_input_message () { # Displays invalid input message
 	clear
-	echo "${red}INVALID INPUT: ${ora}"
-	printf '%s\n' ${@}
+	echo "${red}INVALID INPUT:${whi}"
+	printf "${ora}%s${IFS}${whi}" ${@}
 	echo "${pur}PLEASE RE-ENTER INPUT${whi}"
 } # re_enter_input_message
 

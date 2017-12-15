@@ -1,16 +1,17 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 08/31/2014 By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: 10/21/2015 By: Evan Layher
-# Revised: 09/09/2015 By: Evan Layher # Time output only and allow user input
+# Created: 08/31/2014 By: Evan Layher (1.0) (layher@psych.ucsb.edu)
+# Revised: 10/21/2015 By: Evan Layher (1.1)
+# Revised: 09/09/2015 By: Evan Layher (1.2) Time output only and allow user input
+# Revised: 12/15/2017 By: Evan Layher (1.3) Minor updates
 #--------------------------------------------------------------------------------------#
 # Display process time of a script
-# Simply source this script and input: script_time_func
+# Simply source this script and input: time_func
 
 # EXAMPLE:
 #--------------------------------------------------------------------------------------#
 #!/bin/sh
-#source ${HOME}/.ealayher_code/script_time_func.sh
+#source time_func.sh
 #echo "Science is awesome"
 #script_time_func
 #exit 0
@@ -19,7 +20,7 @@
 ## --- LICENSE INFORMATION --- ##
 ## script_time_func.sh is the proprietary property of The Regents of the University of California ("The Regents.")
 
-## Copyright © 2014-16 The Regents of the University of California, Davis campus. All Rights Reserved.
+## Copyright © 2014-17 The Regents of the University of California, Davis campus. All Rights Reserved.
 
 ## Redistribution and use in source and binary forms, with or without modification, are permitted by nonprofit, 
 ## research institutions for research use only, provided that the following conditions are met:
@@ -45,27 +46,27 @@
 ## For commercial license information please contact copyright@ucdavis.edu.
 ## --------------------------- ##
 
-script_start_time=$(date +%s) # Time in seconds
+start_time=$(date +%s) # Time in seconds
 
-script_time_func () { # Script process time calculation
+time_func () { # Script process time calculation
 	func_end_time=$(date +%s) # Time in seconds
-	user_input_time="${1}"
-	valid_display_time='yes'
+	input_time="${1}"
+	valid_time='yes'
 	
-	if ! [ -z "${user_input_time}" ] && [ "${user_input_time}" -eq "${user_input_time}" 2>/dev/null ]; then
-		func_start_time="${user_input_time}"
-	elif ! [ -z "${script_start_time}" ] && [ "${script_start_time}" -eq "${script_start_time}" 2>/dev/null ]; then
-		func_start_time="${script_start_time}"
-	else # If no integer input or 'script_start_time' undefined
-		valid_display_time='no'
+	if ! [ -z "${input_time}" ] && [ "${input_time}" -eq "${input_time}" 2>/dev/null ]; then
+		func_start_time="${input_time}"
+	elif ! [ -z "${start_time}" ] && [ "${start_time}" -eq "${start_time}" 2>/dev/null ]; then
+		func_start_time="${start_time}"
+	else # If no integer input or 'start_time' undefined
+		valid_time='no'
 	fi
 	
-	if [ "${valid_display_time}" == 'yes' ]; then
-		script_process_time=$((${func_end_time} - ${func_start_time}))
-		days=$((${script_process_time} / 86400))
-		hours=$((${script_process_time} % 86400 / 3600))
-		mins=$((${script_process_time} % 3600 / 60))
-		secs=$((${script_process_time} % 60))
+	if [ "${valid_time}" == 'yes' ]; then
+		process_time=$((${func_end_time} - ${func_start_time}))
+		days=$((${process_time} / 86400))
+		hours=$((${process_time} % 86400 / 3600))
+		mins=$((${process_time} % 3600 / 60))
+		secs=$((${process_time} % 60))
 	
 		if [ "${days}" -gt '0' ]; then 
 			echo "PROCESS TIME: ${days} day(s) ${hours} hour(s) ${mins} minute(s) ${secs} second(s)"
@@ -78,5 +79,5 @@ script_time_func () { # Script process time calculation
 		fi
 	else # Unknown start time
 		echo "UNKNOWN PROCESS TIME"
-	fi # if [ "${valid_display_time}" == 'yes' ]
-} # script_time_func
+	fi # if [ "${valid_time}" == 'yes' ]
+} # time_func

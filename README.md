@@ -18,5 +18,5 @@ A script that creates default scripts. Personalize code inside **create_script**
 **open_files.sh**:  
 Open files, create new files or open blank text editor.
 
-**script_time_func.sh**:  
+**time_func.sh**:  
 Function that calculates the process time of a shell script (*source* path inside of shell script)  

@@ -10,6 +10,7 @@
 # Revised: 09/09/2016 By: Evan Layher # (3.5) Updated functions + minor updates
 # Revised: 02/16/2017 By: Evan Layher # (3.6) Minor updates
 # Revised: 12/13/2017 By: Evan Layher # (3.7) Minor updates
+# Revised: 01/10/2018 By: Evan Layher # (3.8) Added display_values function + minor updates
 # Reference: github.com/ealayher/bash_tools
 #--------------------------------------------------------------------------------------#
 # Create new scripts with customized information
@@ -17,7 +18,7 @@
 ## --- LICENSE INFORMATION --- ##
 ## create_script.sh is the proprietary property of The Regents of the University of California ("The Regents.")
 
-## Copyright © 2014-17 The Regents of the University of California, Davis campus. All Rights Reserved.
+## Copyright © 2014-18 The Regents of the University of California, Davis campus. All Rights Reserved.
 
 ## Redistribution and use in source and binary forms, with or without modification, are permitted by nonprofit, 
 ## research institutions for research use only, provided that the following conditions are met:
@@ -84,7 +85,7 @@ exit_message 0
 #----------------------- GENERAL SCRIPT VARIABLES --------------------------#
 todays_date=$(date +%x)         # Inputs date inside of script
 script_path="${BASH_SOURCE[0]}" # Script path (becomes absolute path later)
-version='3.7'            # Script version number
+version='3.8'            # Script version number
 
 	###--- 'yes' or 'no' options (inputs do the opposite of default) ---###
 activate_colors='yes'   # 'yes': Display messages in color [INPUT: '-nc']
@@ -148,7 +149,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
@@ -226,6 +227,14 @@ control_bg_jobs () { # Controls number of background processes
 	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
+
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
 	file_mac=\$(basename \"\${1}\") # Filename
@@ -291,6 +300,11 @@ vital_file () { # Exit script if missing file
 } # vital_file
 
 #-------------------------------- MESSAGES ---------------------------------#
+control_c () { # Function activates after 'ctrl + c'
+	echo \"\${red}FINISHING CURRENT BACKGROUND PROCESSES BEFORE CRASHING\${whi}\"
+	exit_message 96 -nh -nt
+} # control_c
+
 exit_message () { # Script exit message
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -334,12 +348,6 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 time_func () { # Script process time calculation
 	func_end_time=\$(date +%s) # Time in seconds
 	input_time=\"\${1}\"
@@ -375,6 +383,7 @@ time_func () { # Script process time calculation
 } # time_func
 
 #---------------------------------- CODE -----------------------------------#
+trap control_c SIGINT 2>/dev/null # Finishes background processes before crashing
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Read through all inputs
@@ -397,7 +406,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1 -nt
 fi
 
@@ -453,7 +464,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
@@ -502,6 +513,14 @@ color_formats () { # Print colorful terminal text
 		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
+
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
 
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
@@ -611,12 +630,6 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 time_func () { # Script process time calculation
 	func_end_time=\$(date +%s) # Time in seconds
 	input_time=\"\${1}\"
@@ -674,7 +687,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1 -nt
 fi
 
@@ -731,7 +746,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
@@ -809,6 +824,14 @@ control_bg_jobs () { # Controls number of background processes
 	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
+
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
 	file_mac=\$(basename \"\${1}\") # Filename
@@ -850,6 +873,11 @@ open_text_editor () { # Opens input file in background (GUI text editors only)
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
+control_c () { # Function activates after 'ctrl + c'
+	echo \"\${red}FINISHING CURRENT BACKGROUND PROCESSES BEFORE CRASHING\${whi}\"
+	exit_message 98 -nh -nt
+} # control_c
+
 exit_message () { # Script exit message
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -893,12 +921,6 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 time_func () { # Script process time calculation
 	func_end_time=\$(date +%s) # Time in seconds
 	input_time=\"\${1}\"
@@ -934,6 +956,7 @@ time_func () { # Script process time calculation
 } # time_func
 
 #---------------------------------- CODE -----------------------------------#
+trap control_c SIGINT 2>/dev/null # Finishes background processes before crashing
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Read through all inputs
@@ -956,7 +979,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1 -nt
 fi
 
@@ -1012,7 +1037,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 show_time='yes'       # 'yes': Display process time      [INPUT: '-nt']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
@@ -1061,6 +1086,14 @@ color_formats () { # Print colorful terminal text
 		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
+
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
 
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
@@ -1146,12 +1179,6 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 time_func () { # Script process time calculation
 	func_end_time=\$(date +%s) # Time in seconds
 	input_time=\"\${1}\"
@@ -1209,7 +1236,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1 -nt
 fi
 
@@ -1264,7 +1293,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
@@ -1338,6 +1367,14 @@ control_bg_jobs () { # Controls number of background processes
 	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
+
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
 	file_mac=\$(basename \"\${1}\") # Filename
@@ -1403,6 +1440,11 @@ vital_file () { # Exit script if missing file
 } # vital_file
 
 #-------------------------------- MESSAGES ---------------------------------#
+control_c () { # Function activates after 'ctrl + c'
+	echo \"\${red}FINISHING CURRENT BACKGROUND PROCESSES BEFORE CRASHING\${whi}\"
+	exit_message 96 -nh
+} # control_c
+
 exit_message () { # Script exit message
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1439,13 +1481,8 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 #---------------------------------- CODE -----------------------------------#
+trap control_c SIGINT 2>/dev/null # Finishes background processes before crashing
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Read through all inputs
@@ -1468,7 +1505,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1
 fi
 
@@ -1522,7 +1561,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
@@ -1567,6 +1606,14 @@ color_formats () { # Print colorful terminal text
 		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
+
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
 
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
@@ -1669,12 +1716,6 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 #---------------------------------- CODE -----------------------------------#
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
@@ -1698,7 +1739,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1
 fi
 
@@ -1753,7 +1796,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
@@ -1827,6 +1870,14 @@ control_bg_jobs () { # Controls number of background processes
 	fi # if [ \"\${max_bg_jobs}\" -eq '1' 2>/dev/null ]
 } # control_bg_jobs
 
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
+
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
 	file_mac=\$(basename \"\${1}\") # Filename
@@ -1868,6 +1919,11 @@ open_text_editor () { # Opens input file in background (GUI text editors only)
 } # open_text_editor
 
 #-------------------------------- MESSAGES ---------------------------------#
+control_c () { # Function activates after 'ctrl + c'
+	echo \"\${red}FINISHING CURRENT BACKGROUND PROCESSES BEFORE CRASHING\${whi}\"
+	exit_message 98 -nh
+} # control_c
+
 exit_message () { # Script exit message
 	if [ -z \"\${1}\" 2>/dev/null ] || ! [ \"\${1}\" -eq \"\${1}\" 2>/dev/null ]; then
 		exit_type='0'
@@ -1904,13 +1960,8 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 #---------------------------------- CODE -----------------------------------#
+trap control_c SIGINT 2>/dev/null # Finishes background processes before crashing
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
 for inputs; do # Read through all inputs
@@ -1933,7 +1984,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1
 fi
 
@@ -1987,7 +2040,7 @@ activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
 display_exit='yes'    # 'yes': Display an exit message   [INPUT: '-nm']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
@@ -2032,6 +2085,14 @@ color_formats () { # Print colorful terminal text
 		formatreset=\$(tput sgr0)          # Reset to default terminal settings
 	fi
 } # color_formats
+
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
 
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
@@ -2110,12 +2171,6 @@ exit_message () { # Script exit message
 	exit \"\${exit_type}\"
 } # exit_message
 
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 #---------------------------------- CODE -----------------------------------#
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
@@ -2139,7 +2194,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit_message 1
 fi
 
@@ -2191,7 +2248,7 @@ version='1.0' # Script version number
 activate_colors='yes' # 'yes': Display messages in color [INPUT: '-nc']
 activate_help='no'    # 'no' : Display help message      [INPUT: '-h' or '--help']
 clear_screen='yes'    # 'yes': Clear screen at start     [INPUT: '-cs']
-force_overwrite='no'  # 'no' : Do not overwrite files    [INPUT: '-f']
+force_overwrite='no'  # 'no' : Overwrite output file(s)  [INPUT: '-f']
 open_script='no'      # 'no' : Open this script          [INPUT: '-o' or '--open']
 suggest_help='no'     # 'no' : Suggest help (within script option: '-nh')
 
@@ -2235,6 +2292,14 @@ color_formats () { # Print colorful terminal text
 	fi
 } # color_formats
 
+display_values () { # Display output with numbers
+	if [ \"\${#@}\" -gt '0' ]; then
+		val_count=(\$(seq 1 1 \${#@}))
+		vals_and_count=(\$(paste -d \"\${IFS}\" <(printf \"%s\${IFS}\" \${val_count[@]}) <(printf \"%s\${IFS}\" \${@})))
+		printf \"\${pur}[\${ora}%s\${pur}] \${gre}%s\${IFS}\${whi}\" \${vals_and_count[@]}
+	fi
+} # display_values
+
 mac_readlink () { # Get absolute path of a file (mac and linux compatible)
 	dir_mac=\$(dirname \"\${1}\")   # Directory path
 	file_mac=\$(basename \"\${1}\") # Filename
@@ -2275,13 +2340,6 @@ open_text_editor () { # Opens input file in background (GUI text editors only)
 	fi # if [ -f \"\${open_file}\" ]; then
 } # open_text_editor
 
-#-------------------------------- MESSAGES ---------------------------------#
-invalid_msg () { # Displays invalid input message
-	clear
-	echo \"\${red}INVALID INPUT:\${whi}\"
-	printf \"\${ora}%s\${IFS}\${whi}\" \${@}
-} # invalid_msg
-
 #---------------------------------- CODE -----------------------------------#
 script_path=\$(mac_readlink \"\${script_path}\") # similar to 'readlink -f' in linux
 
@@ -2305,7 +2363,9 @@ fi
 
 # Exit script if invalid inputs
 if [ \"\${#bad_inputs[@]}\" -gt '0' ]; then
-	invalid_msg \${bad_inputs[@]}
+	clear
+	echo \"\${red}INVALID INPUT:\${whi}\"
+	display_values \${bad_inputs[@]}
 	exit 1
 fi
 

@@ -1,8 +1,9 @@
 #!/bin/bash
 #--------------------------------------------------------------------------------------#
-# Created: 06/22/15 By: Evan Layher (evan.layher@psych.ucsb.edu)
-# Revised: 10/19/15 By: Evan Layher
-# Revised: 02/12/16 By: Evan Layher # 'awk' error when input >100 characters
+# Created: 06/22/2015 By: Evan Layher (1.0) (evan.layher@psych.ucsb.edu)
+# Revised: 10/19/2015 By: Evan Layher (1.1)
+# Revised: 02/12/2016 By: Evan Layher (1.2) 'awk' error when input >100 characters
+# Revised: 01/21/2018 By: Evan Layher (1.3) minor updates
 #--------------------------------------------------------------------------------------#
 # sum, average, multiply, divide or power in bash (floats and integers)
 # source script and input following functions with values

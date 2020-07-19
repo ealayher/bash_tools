@@ -13,7 +13,7 @@
 #!/bin/sh
 #source time_func.sh
 #echo "Science is awesome"
-#script_time_func
+#time_func
 #exit 0
 #--------------------------------------------------------------------------------------#
 
